@@ -1,42 +1,44 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.pbb.android.application)
+    alias(libs.plugins.pbb.android.compose)
+    alias(libs.plugins.pbb.hilt)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
-    namespace = "com.example.blockpuzzle"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    namespace = "com.puzzleblockblast.game"
 
     defaultConfig {
-        applicationId = "com.example.blockpuzzle"
-        minSdk = 24
-        targetSdk = 36
+        applicationId = "com.puzzleblockblast.game"
         versionCode = 1
-        versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        versionName = "0.1.0"
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+        }
         release {
             optimization {
+                // R8 shrinking is enabled and verified in Phase 8 (release preparation).
                 enable = false
             }
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
 }
 
 dependencies {
-    implementation(libs.appcompat)
-    implementation(libs.material)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.espresso.core)
-    androidTestImplementation(libs.ext.junit)
+    implementation(project(":core:designsystem"))
+    implementation(project(":core:data"))
+    implementation(project(":core:analytics"))
+    implementation(project(":feature:home"))
+    implementation(project(":feature:game"))
+    implementation(project(":feature:settings"))
+
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
 }

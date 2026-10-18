@@ -8,8 +8,16 @@
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
 .DS_Store
-/build
+build/
 /captures
+.kotlin/
+
+# Secrets and per-developer Firebase / signing config — never commit
+google-services.json
+*.jks
+*.keystore
+keystore.properties
+secrets.properties
 .externalNativeBuild
 .cxx
 local.properties

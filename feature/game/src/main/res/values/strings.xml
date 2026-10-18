@@ -1,0 +1,10 @@
+<resources>
+    <string name="game_score">Score</string>
+    <string name="game_best">Best</string>
+    <string name="game_back">Back</string>
+    <plurals name="game_board_description">
+        <item quantity="one">Puzzle board, %1$d by %2$d cells, %3$d cell filled</item>
+        <item quantity="other">Puzzle board, %1$d by %2$d cells, %3$d cells filled</item>
+    </plurals>
+    <string name="game_placeholder">Gameplay arrives in Phase 2.</string>
+</resources>

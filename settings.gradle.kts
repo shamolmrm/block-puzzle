@@ -1,4 +1,5 @@
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google {
             content {
@@ -22,6 +23,17 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Block Puzzle"
+rootProject.name = "PuzzleBlockBlast"
+
 include(":app")
- 
+
+include(":core:engine")
+include(":core:model")
+include(":core:designsystem")
+include(":core:data")
+include(":core:analytics")
+include(":core:testing")
+
+include(":feature:home")
+include(":feature:game")
+include(":feature:settings")
