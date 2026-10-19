@@ -5,4 +5,5 @@ plugins {
 dependencies {
     implementation(project(":core:engine"))
     implementation(project(":core:model"))
+    implementation(project(":core:data"))
 }

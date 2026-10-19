@@ -1,7 +1,7 @@
 # Classic Mode rules and scoring (v1)
 
-Status: **approved design, implemented in Phase 2.** Phase 1 contains only `Board` and `Shape`.
-Every number below will be a named constant in `:core:engine`. Later on, Remote Config may tune some of them within clamped ranges.
+Status: **implemented (Phase 2)** in `:core:engine` (`ClassicRules`, `Scoring`, `ClassicGame`).
+Every number below is a named constant in `ClassicRules`. Later on, Remote Config may tune some of them within clamped ranges.
 
 ## Board and pieces
 - The board is 10×10 (levels may use other sizes, up to 12×12).

@@ -8,6 +8,8 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 
 private val LightColors = lightColorScheme(
@@ -55,7 +57,10 @@ fun PbbTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    CompositionLocalProvider(LocalBoardColors provides DefaultBoardColors) {
+    CompositionLocalProvider(
+        LocalBoardColors provides DefaultBoardColors,
+        LocalBackgroundGradient provides if (darkTheme) DarkGradient else LightGradient,
+    ) {
         MaterialTheme(
             colorScheme = if (darkTheme) DarkColors else LightColors,
             typography = PbbTypography,
@@ -67,4 +72,11 @@ fun PbbTheme(
 object PbbTheme {
     val boardColors: BoardColors
         @Composable @ReadOnlyComposable get() = LocalBoardColors.current
+
+    val backgroundGradient: List<Color>
+        @Composable @ReadOnlyComposable get() = LocalBackgroundGradient.current
 }
+
+private val LightGradient = listOf(Indigo50, Indigo100, Color(0xFFD9D4F7))
+private val DarkGradient = listOf(Color(0xFF2E2470), Indigo900, Color(0xFF0F0D26))
+private val LocalBackgroundGradient = staticCompositionLocalOf { LightGradient }

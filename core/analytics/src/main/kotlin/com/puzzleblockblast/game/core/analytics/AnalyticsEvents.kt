@@ -12,11 +12,27 @@ object AnalyticsEvents {
     const val DAILY_CHALLENGE_COMPLETED = "daily_challenge_completed"
     const val REWARDED_AD_COMPLETED = "rewarded_ad_completed"
     const val SETTINGS_CHANGED = "settings_changed"
+    const val HINT_USED = "hint_used"
+    const val UNDO_USED = "undo_used"
 
     object Params {
         const val MODE = "mode"
         const val SETTING = "setting"
         const val ENABLED = "enabled"
+        const val RESUMED = "resumed"
+        const val SCORE_BUCKET = "score_bucket"
+        const val MOVES = "moves"
+        const val SOURCE = "source"
+    }
+
+    /** Coarse score ranges: exact scores add nothing for retention analysis. */
+    fun scoreBucket(score: Int): String = when {
+        score < 100 -> "0_99"
+        score < 500 -> "100_499"
+        score < 1_000 -> "500_999"
+        score < 2_500 -> "1000_2499"
+        score < 5_000 -> "2500_4999"
+        else -> "5000_plus"
     }
 }
 

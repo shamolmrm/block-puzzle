@@ -34,8 +34,8 @@ data class BoardColors(
 }
 
 internal val DefaultBoardColors = BoardColors(
-    boardBackground = Indigo900,
-    emptyCell = Indigo800,
+    boardBackground = Color(0xFF15123A),
+    emptyCell = Color(0xFF231F55),
     gridLine = Indigo700,
     ghostValid = Color(0x8CFFFFFF),
     ghostInvalid = Color(0x8CFF5A5A),

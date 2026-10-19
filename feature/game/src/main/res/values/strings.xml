@@ -1,10 +1,31 @@
 <resources>
     <string name="game_score">Score</string>
     <string name="game_best">Best</string>
-    <string name="game_back">Back</string>
+    <string name="game_pause">Pause</string>
+    <string name="game_combo">Combo ×%1$d</string>
+    <string name="game_board_clear">Board clear!</string>
     <plurals name="game_board_description">
         <item quantity="one">Puzzle board, %1$d by %2$d cells, %3$d cell filled</item>
         <item quantity="other">Puzzle board, %1$d by %2$d cells, %3$d cells filled</item>
     </plurals>
-    <string name="game_placeholder">Gameplay arrives in Phase 2.</string>
+    <string name="game_slot_empty">Slot %1$d, empty</string>
+    <string name="game_slot_piece">Slot %1$d, piece with %2$d blocks. Drag onto the board.</string>
+    <string name="game_slot_piece_no_fit">Slot %1$d, piece with %2$d blocks, no space on the board</string>
+    <string name="game_undo">Undo (%1$d)</string>
+    <string name="game_hint">Hint (%1$d)</string>
+    <string name="game_no_hints_left">No hints left for this game</string>
+    <string name="game_no_valid_move">No piece fits on the board</string>
+
+    <string name="game_paused">Paused</string>
+    <string name="game_resume">Resume</string>
+    <string name="game_restart">Restart</string>
+    <string name="game_home">Home</string>
+    <string name="game_restart_confirm">Start a new game? This game ends with its current score.</string>
+    <string name="game_cancel">Cancel</string>
+
+    <string name="game_over_title">No more moves</string>
+    <string name="game_over_score">Score %1$d</string>
+    <string name="game_over_best">Best %1$d</string>
+    <string name="game_over_new_best">New best score!</string>
+    <string name="game_play_again">Play again</string>
 </resources>

@@ -1,5 +1,12 @@
 package com.puzzleblockblast.game.feature.home
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -7,23 +14,28 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.puzzleblockblast.game.core.designsystem.component.PbbBackground
 import com.puzzleblockblast.game.core.designsystem.component.PbbMenuButton
+import com.puzzleblockblast.game.core.designsystem.component.drawBlock
 import com.puzzleblockblast.game.core.designsystem.theme.PbbTheme
 
 @Composable
@@ -33,24 +45,29 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
 ) {
     val comingSoon = stringResource(R.string.home_coming_soon)
-    Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+    PbbBackground(modifier = modifier) {
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .safeDrawingPadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
         ) {
+            BlockLogo()
+            Spacer(Modifier.height(8.dp))
             Text(
                 text = stringResource(R.string.home_title),
-                style = MaterialTheme.typography.displaySmall,
+                style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Black),
+                color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.semantics { heading() },
             )
             Text(
                 text = stringResource(R.string.home_subtitle),
                 style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f),
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(24.dp))
@@ -58,15 +75,42 @@ fun HomeScreen(
                 modifier = Modifier.widthIn(max = 420.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                PbbMenuButton(text = stringResource(R.string.home_classic), onClick = onPlayClassic)
+                PbbMenuButton(text = stringResource(R.string.home_classic), onClick = onPlayClassic, hero = true)
                 // Implemented in later phases; visible but disabled so the menu layout is final.
                 PbbMenuButton(stringResource(R.string.home_levels), {}, enabled = false, supportingText = comingSoon)
                 PbbMenuButton(stringResource(R.string.home_daily), {}, enabled = false, supportingText = comingSoon)
                 PbbMenuButton(stringResource(R.string.home_events), {}, enabled = false, supportingText = comingSoon)
-                OutlinedButton(onClick = onOpenSettings, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    Text(stringResource(R.string.home_settings))
+                TextButton(onClick = onOpenSettings, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                    Text(stringResource(R.string.home_settings), style = MaterialTheme.typography.titleMedium)
                 }
             }
+        }
+    }
+}
+
+/** Decorative stack of blocks that gently bobs, one block at a time. */
+@Composable
+private fun BlockLogo() {
+    val colors = PbbTheme.boardColors
+    val wave by rememberInfiniteTransition(label = "logo").animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(1800, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        label = "wave",
+    )
+    // (row, col, tile) on a 3x4 grid.
+    val blocks = listOf(
+        Triple(0, 1, 1), Triple(0, 2, 2),
+        Triple(1, 0, 4), Triple(1, 1, 3), Triple(1, 2, 5), Triple(1, 3, 6),
+        Triple(2, 0, 7), Triple(2, 1, 2), Triple(2, 3, 4),
+    )
+    Canvas(Modifier.size(width = 160.dp, height = 120.dp)) {
+        val cell = size.width / 4
+        val gap = cell * 0.07f
+        blocks.forEachIndexed { i, (r, c, tile) ->
+            val phase = ((wave * blocks.size) - i).coerceIn(0f, 1f)
+            val lift = cell * 0.12f * (1f - kotlin.math.abs(phase * 2f - 1f))
+            drawBlock(Offset(c * cell + gap, r * cell + gap - lift), cell - 2 * gap, colors.tile(tile))
         }
     }
 }

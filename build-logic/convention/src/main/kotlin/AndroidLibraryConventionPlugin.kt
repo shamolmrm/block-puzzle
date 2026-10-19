@@ -27,5 +27,8 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             }
         }
         addUnitTestDependencies()
+        // Every library gets a test APK; without the runner it crashes even when it has no tests.
+        dependencies.add("androidTestImplementation", libs.lib("androidx-test-runner"))
+        dependencies.add("androidTestImplementation", libs.lib("androidx-test-ext-junit"))
     }
 }
