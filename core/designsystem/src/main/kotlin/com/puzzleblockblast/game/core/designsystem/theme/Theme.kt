@@ -77,6 +77,9 @@ object PbbTheme {
         @Composable @ReadOnlyComposable get() = LocalBackgroundGradient.current
 }
 
+/** True when the player turned on "Reduced motion": decorative animations are skipped. */
+val LocalReducedMotion = staticCompositionLocalOf { false }
+
 private val LightGradient = listOf(Indigo50, Indigo100, Color(0xFFD9D4F7))
 private val DarkGradient = listOf(Color(0xFF2E2470), Indigo900, Color(0xFF0F0D26))
 private val LocalBackgroundGradient = staticCompositionLocalOf { LightGradient }

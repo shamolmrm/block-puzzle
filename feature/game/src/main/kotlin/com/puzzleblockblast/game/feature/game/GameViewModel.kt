@@ -5,8 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.puzzleblockblast.game.core.analytics.AnalyticsEvent
 import com.puzzleblockblast.game.core.analytics.AnalyticsEvents
 import com.puzzleblockblast.game.core.analytics.AnalyticsTracker
+import com.puzzleblockblast.game.core.audio.Sound
+import com.puzzleblockblast.game.core.audio.SoundEffects
 import com.puzzleblockblast.game.core.data.classic.ClassicGameRepository
 import com.puzzleblockblast.game.core.data.di.ApplicationScope
+import com.puzzleblockblast.game.core.data.settings.SettingsRepository
 import com.puzzleblockblast.game.core.engine.board.GridPoint
 import com.puzzleblockblast.game.core.engine.classic.ClassicGame
 import com.puzzleblockblast.game.core.engine.classic.GameState
@@ -15,6 +18,7 @@ import com.puzzleblockblast.game.core.engine.classic.Move
 import com.puzzleblockblast.game.core.engine.classic.MoveOutcome
 import com.puzzleblockblast.game.core.engine.classic.MoveResult
 import com.puzzleblockblast.game.core.model.GameMode
+import com.puzzleblockblast.game.core.model.UserSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -26,7 +30,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class GameMessage { NO_HINTS_LEFT, NO_VALID_MOVE }
+enum class GameMessage { NO_HINTS_LEFT, NO_VALID_MOVE, TUTORIAL_TRY_TARGET }
+
+/** The sound that best describes a move: the biggest event wins. */
+internal fun soundFor(outcome: MoveOutcome): Sound = when {
+    outcome.gameOver -> Sound.GAME_OVER
+    outcome.score.boardClearBonus > 0 -> Sound.BOARD_CLEAR
+    outcome.score.combo >= 2 -> Sound.COMBO
+    outcome.clearedLines.count >= 2 -> Sound.CLEAR_MULTI
+    outcome.clearedLines.count == 1 -> Sound.CLEAR
+    else -> Sound.PLACE
+}
 
 data class GameUiState(
     val isLoading: Boolean = true,
@@ -40,6 +54,7 @@ data class GameUiState(
     val lastOutcome: MoveOutcome? = null,
     val isNewBest: Boolean = false,
     val message: GameMessage? = null,
+    val settings: UserSettings = UserSettings(),
 ) {
     val isPlaying: Boolean get() = game != null && !game.isGameOver && !isPaused
     val canUndo: Boolean get() = isPlaying && game?.canUndo == true
@@ -54,6 +69,8 @@ class GameViewModel @Inject constructor(
     private val analytics: AnalyticsTracker,
     private val seeds: SeedSource,
     @param:ApplicationScope private val appScope: CoroutineScope,
+    settingsRepository: SettingsRepository,
+    private val sounds: SoundEffects,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GameUiState())
@@ -83,11 +100,14 @@ class GameViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
+            settingsRepository.settings.collect { s -> _uiState.update { it.copy(settings = s) } }
+        }
+        viewModelScope.launch {
             val best = repository.bestScore.first()
             val restored = repository.loadInProgress()
             bestAtStart = best
             val state = restored ?: classic.newGame(seeds.nextSeed())
-            _uiState.value = GameUiState(isLoading = false, bestScore = best).withGame(state)
+            _uiState.update { it.copy(isLoading = false, bestScore = best).withGame(state) }
             logGameStarted(resumed = restored != null)
 
             repository.bestScore.collect { stored -> _uiState.update { it.copy(bestScore = stored) } }
@@ -101,6 +121,7 @@ class GameViewModel @Inject constructor(
         val result = classic.place(state, Move(slot, origin)) as? MoveResult.Accepted ?: return
 
         val next = result.state
+        if (current.settings.soundEnabled) sounds.play(soundFor(result.outcome))
         if (next.isGameOver) {
             _uiState.update {
                 it.withGame(next).copy(lastOutcome = result.outcome, isNewBest = next.score > bestAtStart)
@@ -160,7 +181,8 @@ class GameViewModel @Inject constructor(
         if (!state.isGameOver) writes.trySend(Write.Finish(state.score))
         bestAtStart = current.displayBest
         _uiState.update {
-            GameUiState(isLoading = false, bestScore = current.displayBest).withGame(classic.newGame(seeds.nextSeed()))
+            GameUiState(isLoading = false, bestScore = current.displayBest, settings = it.settings)
+                .withGame(classic.newGame(seeds.nextSeed()))
         }
         logGameStarted(resumed = false)
     }

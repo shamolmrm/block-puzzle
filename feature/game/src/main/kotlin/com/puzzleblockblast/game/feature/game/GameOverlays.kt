@@ -9,6 +9,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import com.puzzleblockblast.game.core.designsystem.theme.LocalReducedMotion
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +43,7 @@ import androidx.compose.ui.unit.dp
 
 /** Dims the game and blocks touches to it while a dialog card is shown. */
 @Composable
-private fun OverlayScrim(content: @Composable () -> Unit) {
+internal fun OverlayScrim(content: @Composable () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -50,7 +51,8 @@ private fun OverlayScrim(content: @Composable () -> Unit) {
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {},
         contentAlignment = Alignment.Center,
     ) {
-        val pop = remember { Animatable(0.85f) }
+        val reducedMotion = LocalReducedMotion.current
+        val pop = remember { Animatable(if (reducedMotion) 1f else 0.85f) }
         LaunchedEffect(Unit) { pop.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy)) }
         Card(
             shape = RoundedCornerShape(28.dp),

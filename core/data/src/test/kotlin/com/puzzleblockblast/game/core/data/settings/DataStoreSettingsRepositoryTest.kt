@@ -43,5 +43,17 @@ class DataStoreSettingsRepositoryTest {
         }
 
         assertThat(DataStoreSettingsRepository(broken).settings.first()).isEqualTo(UserSettings())
+        assertThat(DataStoreSettingsRepository(broken).tutorialCompleted.first()).isFalse()
+    }
+
+    @Test
+    fun tutorialFlagStartsFalseAndIsPersisted() = runTest {
+        val repo = DataStoreSettingsRepository(InMemoryDataStore(emptyPreferences()))
+        assertThat(repo.tutorialCompleted.first()).isFalse()
+
+        repo.setTutorialCompleted()
+
+        assertThat(repo.tutorialCompleted.first()).isTrue()
+        assertThat(repo.settings.first()).isEqualTo(UserSettings())
     }
 }

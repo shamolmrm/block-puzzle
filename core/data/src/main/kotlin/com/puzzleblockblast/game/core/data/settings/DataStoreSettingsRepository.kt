@@ -36,6 +36,13 @@ class DataStoreSettingsRepository @Inject constructor(
     override suspend fun setHapticsEnabled(enabled: Boolean) = set(Keys.HAPTICS, enabled)
     override suspend fun setReducedMotion(enabled: Boolean) = set(Keys.REDUCED_MOTION, enabled)
 
+    override val tutorialCompleted: Flow<Boolean> = dataStore.data
+        .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
+        .map { it[Keys.TUTORIAL_COMPLETED] ?: false }
+        .distinctUntilChanged()
+
+    override suspend fun setTutorialCompleted() = set(Keys.TUTORIAL_COMPLETED, true)
+
     private suspend fun set(key: Preferences.Key<Boolean>, value: Boolean) {
         dataStore.edit { it[key] = value }
     }
@@ -45,5 +52,6 @@ class DataStoreSettingsRepository @Inject constructor(
         val MUSIC = booleanPreferencesKey("music_enabled")
         val HAPTICS = booleanPreferencesKey("haptics_enabled")
         val REDUCED_MOTION = booleanPreferencesKey("reduced_motion")
+        val TUTORIAL_COMPLETED = booleanPreferencesKey("tutorial_completed")
     }
 }

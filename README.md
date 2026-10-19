@@ -3,8 +3,10 @@
 An original casual block-puzzle game for Android: Kotlin, Jetpack Compose, ViewModel + StateFlow, Hilt and DataStore.
 It is built to play offline first. Firebase and ads are added in later phases, behind interfaces.
 
-> **Status: Phase 2 (playable offline Classic Mode).** Classic is fully playable offline with drag-and-drop,
+> **Status: Phase 3 (polish, tutorial, sound).** Classic is fully playable offline with drag-and-drop,
 > line clears, combos, undo (1 per game), hints (3 per game), pause/restart, best score and automatic save/resume.
+> A guided tutorial runs on first launch (replay via "How to play"). Sound effects are synthesized in code
+> (`:core:audio`, no audio assets); haptics and "Reduce motion" follow Settings. Music is not implemented yet.
 > Levels, Daily Challenge and Events are shown as "Coming soon". See [`docs/PLAN.md`](docs/PLAN.md) for the roadmap.
 
 ## Requirements

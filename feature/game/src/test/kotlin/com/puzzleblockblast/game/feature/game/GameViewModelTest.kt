@@ -11,9 +11,14 @@ import com.puzzleblockblast.game.core.engine.classic.Piece
 import com.puzzleblockblast.game.core.engine.random.Pcg32
 import com.puzzleblockblast.game.core.engine.shape.ShapeCatalog
 import com.puzzleblockblast.game.core.testing.FakeAnalyticsTracker
+import com.puzzleblockblast.game.core.audio.Sound
+import com.puzzleblockblast.game.core.model.UserSettings
 import com.puzzleblockblast.game.core.testing.FakeClassicGameRepository
+import com.puzzleblockblast.game.core.testing.FakeSettingsRepository
+import com.puzzleblockblast.game.core.testing.FakeSoundEffects
 import com.puzzleblockblast.game.core.testing.MainDispatcherRule
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 
@@ -25,15 +30,20 @@ class GameViewModelTest {
     private val classic = ClassicGame()
     private val repository = FakeClassicGameRepository()
     private val analytics = FakeAnalyticsTracker()
+    private val settings = FakeSettingsRepository()
+    private val sounds = FakeSoundEffects()
     private var nextSeed = 100L
 
-    private fun viewModel() = GameViewModel(
-        classic = classic,
-        repository = repository,
-        analytics = analytics,
-        seeds = { nextSeed++ },
-        appScope = CoroutineScope(mainDispatcher.dispatcher),
-    )
+    private fun viewModel(repo: FakeClassicGameRepository = repository, seeds: SeedSource = SeedSource { nextSeed++ }) =
+        GameViewModel(
+            classic = classic,
+            repository = repo,
+            analytics = analytics,
+            seeds = seeds,
+            appScope = CoroutineScope(mainDispatcher.dispatcher),
+            settingsRepository = settings,
+            sounds = sounds,
+        )
 
     private val GameViewModel.game: GameState get() = requireNotNull(uiState.value.game)
 
@@ -188,12 +198,52 @@ class GameViewModelTest {
     fun gameOverBelowBestIsNotNewBest() {
         val repo = FakeClassicGameRepository(initialBest = 10_000)
         kotlinx.coroutines.runBlocking { repo.saveInProgress(almostOverState(score = 250)) }
-        val vm = GameViewModel(classic, repo, analytics, { 1L }, CoroutineScope(mainDispatcher.dispatcher))
+        val vm = viewModel(repo = repo, seeds = { 1L })
 
         vm.onPlace(slot = 0, origin = GridPoint(0, 1))
 
         assertThat(vm.uiState.value.isNewBest).isFalse()
         assertThat(vm.uiState.value.displayBest).isEqualTo(10_000)
+    }
+
+    @Test
+    fun placingPlaysASoundWhenSoundIsOn() {
+        val vm = viewModel()
+
+        vm.playBestMove()
+
+        assertThat(sounds.played).hasSize(1)
+    }
+
+    @Test
+    fun noSoundWhenSoundIsOff() {
+        runBlocking { settings.setSoundEnabled(false) }
+        val vm = viewModel()
+
+        vm.playBestMove()
+
+        assertThat(sounds.played).isEmpty()
+        assertThat(vm.uiState.value.settings.soundEnabled).isFalse()
+    }
+
+    @Test
+    fun gameOverPlaysGameOverSound() {
+        runBlocking { repository.saveInProgress(almostOverState(score = 0)) }
+        val vm = viewModel()
+
+        vm.onPlace(slot = 0, origin = GridPoint(0, 1))
+
+        assertThat(sounds.played).containsExactly(Sound.GAME_OVER)
+    }
+
+    @Test
+    fun restartKeepsSettings() {
+        runBlocking { settings.setReducedMotion(true) }
+        val vm = viewModel()
+
+        vm.onRestart()
+
+        assertThat(vm.uiState.value.settings).isEqualTo(UserSettings(reducedMotion = true))
     }
 
     @Test

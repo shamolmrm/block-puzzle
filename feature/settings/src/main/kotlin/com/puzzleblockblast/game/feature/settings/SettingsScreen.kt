@@ -61,7 +61,7 @@ fun SettingsScreen(
                 modifier = Modifier.padding(vertical = 8.dp).semantics { heading() },
             )
             ToggleRow(R.string.settings_sound, settings.soundEnabled) { onToggle(SettingToggle.SOUND, it) }
-            ToggleRow(R.string.settings_music, settings.musicEnabled) { onToggle(SettingToggle.MUSIC, it) }
+            // No music ships yet, so its toggle stays hidden rather than doing nothing.
             ToggleRow(R.string.settings_haptics, settings.hapticsEnabled) { onToggle(SettingToggle.HAPTICS, it) }
             ToggleRow(R.string.settings_reduced_motion, settings.reducedMotion) {
                 onToggle(SettingToggle.REDUCED_MOTION, it)

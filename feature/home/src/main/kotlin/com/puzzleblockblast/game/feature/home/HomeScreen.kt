@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -36,12 +37,14 @@ import androidx.compose.ui.unit.dp
 import com.puzzleblockblast.game.core.designsystem.component.PbbBackground
 import com.puzzleblockblast.game.core.designsystem.component.PbbMenuButton
 import com.puzzleblockblast.game.core.designsystem.component.drawBlock
+import com.puzzleblockblast.game.core.designsystem.theme.LocalReducedMotion
 import com.puzzleblockblast.game.core.designsystem.theme.PbbTheme
 
 @Composable
 fun HomeScreen(
     onPlayClassic: () -> Unit,
     onOpenSettings: () -> Unit,
+    onHowToPlay: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val comingSoon = stringResource(R.string.home_coming_soon)
@@ -80,8 +83,16 @@ fun HomeScreen(
                 PbbMenuButton(stringResource(R.string.home_levels), {}, enabled = false, supportingText = comingSoon)
                 PbbMenuButton(stringResource(R.string.home_daily), {}, enabled = false, supportingText = comingSoon)
                 PbbMenuButton(stringResource(R.string.home_events), {}, enabled = false, supportingText = comingSoon)
-                TextButton(onClick = onOpenSettings, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    Text(stringResource(R.string.home_settings), style = MaterialTheme.typography.titleMedium)
+                Row(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    TextButton(onClick = onHowToPlay) {
+                        Text(stringResource(R.string.home_how_to_play), style = MaterialTheme.typography.titleMedium)
+                    }
+                    TextButton(onClick = onOpenSettings) {
+                        Text(stringResource(R.string.home_settings), style = MaterialTheme.typography.titleMedium)
+                    }
                 }
             }
         }
@@ -92,12 +103,14 @@ fun HomeScreen(
 @Composable
 private fun BlockLogo() {
     val colors = PbbTheme.boardColors
-    val wave by rememberInfiniteTransition(label = "logo").animateFloat(
+    val reducedMotion = LocalReducedMotion.current
+    val bob by rememberInfiniteTransition(label = "logo").animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(tween(1800, easing = FastOutSlowInEasing), RepeatMode.Reverse),
         label = "wave",
     )
+    val wave = if (reducedMotion) 0f else bob
     // (row, col, tile) on a 3x4 grid.
     val blocks = listOf(
         Triple(0, 1, 1), Triple(0, 2, 2),
@@ -118,5 +131,5 @@ private fun BlockLogo() {
 @Preview
 @Composable
 private fun HomeScreenPreview() {
-    PbbTheme { HomeScreen(onPlayClassic = {}, onOpenSettings = {}) }
+    PbbTheme { HomeScreen(onPlayClassic = {}, onOpenSettings = {}, onHowToPlay = {}) }
 }

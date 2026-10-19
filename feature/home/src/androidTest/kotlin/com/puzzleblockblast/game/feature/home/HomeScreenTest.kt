@@ -22,7 +22,7 @@ class HomeScreenTest {
     fun classicIsEnabledAndOtherModesAreComingSoon() {
         var classicClicks = 0
         compose.setContent {
-            PbbTheme { HomeScreen(onPlayClassic = { classicClicks++ }, onOpenSettings = {}) }
+            PbbTheme { HomeScreen(onPlayClassic = { classicClicks++ }, onOpenSettings = {}, onHowToPlay = {}) }
         }
 
         compose.onNodeWithText("Classic").assertIsEnabled().performClick()

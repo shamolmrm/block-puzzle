@@ -28,4 +28,14 @@
     <string name="game_over_best">Best %1$d</string>
     <string name="game_over_new_best">New best score!</string>
     <string name="game_play_again">Play again</string>
+
+    <string name="tutorial_try_target">Drop the piece on the glowing spot</string>
+    <string name="tutorial_step_of">Step %1$d of %2$d</string>
+    <string name="tutorial_skip">Skip</string>
+    <string name="tutorial_step_row">Drag the piece onto the glowing spot to fill the row.</string>
+    <string name="tutorial_step_column">Columns clear too. Fill this one!</string>
+    <string name="tutorial_step_double">Clear a row and a column at once for bonus points.</string>
+    <string name="tutorial_done_title">You\'re ready!</string>
+    <string name="tutorial_done_body">Pieces can\'t be rotated. Clear lines back to back for a combo. The game ends when none of your pieces fit, so keep space open. Undo and Hints help when you\'re stuck.</string>
+    <string name="tutorial_play">Play Classic</string>
 </resources>

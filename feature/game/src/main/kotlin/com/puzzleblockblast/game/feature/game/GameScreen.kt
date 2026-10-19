@@ -43,7 +43,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
@@ -59,6 +61,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.puzzleblockblast.game.core.designsystem.component.PbbBackground
+import com.puzzleblockblast.game.core.designsystem.theme.LocalReducedMotion
 import com.puzzleblockblast.game.core.designsystem.theme.PbbTheme
 import com.puzzleblockblast.game.core.engine.board.GridPoint
 import com.puzzleblockblast.game.core.engine.classic.ClassicGame
@@ -103,6 +106,10 @@ fun GameScreen(
     onMessageShown: () -> Unit,
     onHome: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Undo / Hint buttons (hidden in the tutorial). */
+    showControls: Boolean = true,
+    /** Replaces the score bar when set (the tutorial shows its instructions there). */
+    header: (@Composable () -> Unit)? = null,
 ) {
     PbbBackground(modifier = modifier) {
         val game = state.game
@@ -118,6 +125,9 @@ fun GameScreen(
         var pointer by remember { mutableStateOf(Offset.Zero) }
         var dropColor by remember { mutableStateOf(Color.White) }
         val liftPx = with(LocalDensity.current) { DRAG_LIFT.toPx() }
+        val reducedMotion = LocalReducedMotion.current
+        val haptics = LocalHapticFeedback.current
+        val hapticsOn = state.settings.hapticsEnabled
 
         // Cancel any drag in progress when play stops (pause, game over, app backgrounded).
         LaunchedEffect(state.isPlaying) { if (!state.isPlaying) dragSlot = null }
@@ -140,7 +150,16 @@ fun GameScreen(
         val outcome = state.lastOutcome
         val feedback = remember { Animatable(1f) }
         LaunchedEffect(outcome, game.moves) {
-            if (outcome != null && !outcome.clearedLines.isEmpty) {
+            if (outcome != null && hapticsOn) {
+                haptics.performHapticFeedback(
+                    when {
+                        outcome.gameOver -> HapticFeedbackType.Reject
+                        !outcome.clearedLines.isEmpty -> HapticFeedbackType.Confirm
+                        else -> HapticFeedbackType.SegmentTick
+                    },
+                )
+            }
+            if (outcome != null && !outcome.clearedLines.isEmpty && !reducedMotion) {
                 feedback.snapTo(0f)
                 feedback.animateTo(1f, tween(FEEDBACK_MS, easing = FastOutSlowInEasing))
             }
@@ -153,6 +172,7 @@ fun GameScreen(
         val messageText = when (state.message) {
             GameMessage.NO_HINTS_LEFT -> stringResource(R.string.game_no_hints_left)
             GameMessage.NO_VALID_MOVE -> stringResource(R.string.game_no_valid_move)
+            GameMessage.TUTORIAL_TRY_TARGET -> stringResource(R.string.tutorial_try_target)
             null -> null
         }
         LaunchedEffect(messageText) {
@@ -173,14 +193,19 @@ fun GameScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterVertically),
             ) {
-                ScoreBar(
-                    score = game.score,
-                    best = state.displayBest,
-                    combo = game.combo,
-                    pauseEnabled = state.isPlaying,
-                    onPause = onPause,
-                    modifier = Modifier.widthIn(max = 480.dp),
-                )
+                if (header != null) {
+                    header()
+                } else {
+                    ScoreBar(
+                        score = game.score,
+                        best = state.displayBest,
+                        combo = game.combo,
+                        pauseEnabled = state.isPlaying,
+                        animate = !reducedMotion,
+                        onPause = onPause,
+                        modifier = Modifier.widthIn(max = 480.dp),
+                    )
+                }
                 Box(contentAlignment = Alignment.Center) {
                     BoardCanvas(
                         board = game.board,
@@ -200,6 +225,7 @@ fun GameScreen(
                     hintSlot = state.hint?.slot,
                     enabled = state.isPlaying,
                     onDragStart = { slot, p ->
+                        if (hapticsOn) haptics.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
                         dragSlot = slot
                         pointer = p
                     },
@@ -215,12 +241,14 @@ fun GameScreen(
                     onDragCancel = { dragSlot = null },
                     modifier = Modifier.widthIn(max = 480.dp),
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    FilledTonalButton(onClick = onUndo, enabled = state.canUndo, modifier = Modifier.heightIn(min = 48.dp)) {
-                        Text(stringResource(R.string.game_undo, game.undosRemaining))
-                    }
-                    FilledTonalButton(onClick = onHint, enabled = state.canHint, modifier = Modifier.heightIn(min = 48.dp)) {
-                        Text(stringResource(R.string.game_hint, game.hintsRemaining))
+                if (showControls) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        FilledTonalButton(onClick = onUndo, enabled = state.canUndo, modifier = Modifier.heightIn(min = 48.dp)) {
+                            Text(stringResource(R.string.game_undo, game.undosRemaining))
+                        }
+                        FilledTonalButton(onClick = onHint, enabled = state.canHint, modifier = Modifier.heightIn(min = 48.dp)) {
+                            Text(stringResource(R.string.game_hint, game.hintsRemaining))
+                        }
                     }
                 }
             }
@@ -303,10 +331,12 @@ private fun ScoreBar(
     best: Int,
     combo: Int,
     pauseEnabled: Boolean,
+    animate: Boolean,
     onPause: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val animatedScore by animateIntAsState(score, tween(400), label = "score")
+    val countUp by animateIntAsState(score, tween(400), label = "score")
+    val animatedScore = if (animate) countUp else score
     val pauseLabel = stringResource(R.string.game_pause)
     Row(
         modifier = modifier.fillMaxWidth(),

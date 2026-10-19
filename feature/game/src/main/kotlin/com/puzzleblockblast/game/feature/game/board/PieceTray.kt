@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.puzzleblockblast.game.core.designsystem.theme.LocalReducedMotion
 import com.puzzleblockblast.game.core.designsystem.theme.PbbTheme
 import com.puzzleblockblast.game.core.engine.classic.Piece
 import com.puzzleblockblast.game.feature.game.R
@@ -132,7 +133,8 @@ private fun TraySlot(
     ) {
         if (piece != null && !hidden) {
             // A newly dealt piece pops in; keyed on the piece so a returned drag doesn't replay it.
-            val pop = remember(piece) { Animatable(0.4f) }
+            val reducedMotion = LocalReducedMotion.current
+            val pop = remember(piece) { Animatable(if (reducedMotion) 1f else 0.4f) }
             LaunchedEffect(piece) {
                 pop.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow))
             }

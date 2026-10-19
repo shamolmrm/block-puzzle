@@ -2,7 +2,6 @@
     <string name="settings_title">Settings</string>
     <string name="settings_back">Back</string>
     <string name="settings_sound">Sound effects</string>
-    <string name="settings_music">Music</string>
     <string name="settings_haptics">Vibration</string>
     <string name="settings_reduced_motion">Reduce motion</string>
 </resources>

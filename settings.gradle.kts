@@ -32,6 +32,7 @@ include(":core:model")
 include(":core:designsystem")
 include(":core:data")
 include(":core:analytics")
+include(":core:audio")
 include(":core:testing")
 
 include(":feature:home")

@@ -6,6 +6,7 @@ plugins {
 dependencies {
     api(project(":core:data"))
     api(project(":core:analytics"))
+    api(project(":core:audio"))
     api(libs.junit)
     api(libs.kotlinx.coroutines.test)
     api(libs.truth)

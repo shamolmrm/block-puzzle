@@ -23,6 +23,7 @@ object AnalyticsEvents {
         const val SCORE_BUCKET = "score_bucket"
         const val MOVES = "moves"
         const val SOURCE = "source"
+        const val SKIPPED = "skipped"
     }
 
     /** Coarse score ranges: exact scores add nothing for retention analysis. */
