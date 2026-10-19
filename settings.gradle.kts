@@ -33,6 +33,7 @@ include(":core:designsystem")
 include(":core:data")
 include(":core:analytics")
 include(":core:audio")
+include(":core:firebase")
 include(":core:testing")
 
 include(":feature:home")

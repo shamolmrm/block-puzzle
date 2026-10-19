@@ -16,7 +16,7 @@ sealed interface LevelPackResult {
 }
 
 /**
- * Parses and validates a level pack (docs/PLAN.md Â§5). Anything unexpected (unsupported schema,
+ * Parses and validates a level pack (docs/PLAN.md §5). Anything unexpected (unsupported schema,
  * malformed JSON, unknown objective, bad board characters, failed [LevelValidator] checks) makes the
  * whole pack invalid: a partly loaded pack could renumber levels under the player.
  */

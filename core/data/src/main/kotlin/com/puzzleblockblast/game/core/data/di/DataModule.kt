@@ -15,14 +15,20 @@ import com.puzzleblockblast.game.core.data.level.LevelProgressRepository
 import com.puzzleblockblast.game.core.data.level.LevelRepository
 import com.puzzleblockblast.game.core.data.level.PbbDatabase
 import com.puzzleblockblast.game.core.data.level.RoomLevelProgressRepository
+import com.puzzleblockblast.game.core.data.progress.ProgressListener
 import com.puzzleblockblast.game.core.data.progress.ProgressionRepository
+import com.puzzleblockblast.game.core.data.sync.CloudBackup
+import com.puzzleblockblast.game.core.data.sync.SyncRepository
+import com.puzzleblockblast.game.core.data.sync.SyncScheduler
 import com.puzzleblockblast.game.core.data.progress.RoomProgressionRepository
 import com.puzzleblockblast.game.core.data.time.SystemWallClock
 import com.puzzleblockblast.game.core.data.time.WallClock
 import com.puzzleblockblast.game.core.data.settings.DataStoreSettingsRepository
 import com.puzzleblockblast.game.core.data.settings.SettingsDataStore
 import com.puzzleblockblast.game.core.data.settings.SettingsRepository
+import com.puzzleblockblast.game.core.data.config.ConfigRepository
 import com.puzzleblockblast.game.core.engine.classic.ClassicGame
+import com.puzzleblockblast.game.core.engine.classic.ClassicRules
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -58,6 +64,12 @@ abstract class DataModule {
     @Binds
     abstract fun bindWallClock(impl: SystemWallClock): WallClock
 
+    @Binds
+    abstract fun bindProgressListener(impl: SyncScheduler): ProgressListener
+
+    @Binds
+    abstract fun bindCloudBackup(impl: SyncRepository): CloudBackup
+
     companion object {
         @Provides
         @Singleton
@@ -81,7 +93,8 @@ abstract class DataModule {
 
         @Provides
         @Singleton
-        fun provideClassicGame(): ClassicGame = ClassicGame()
+        fun provideClassicGame(config: ConfigRepository): ClassicGame =
+            ClassicGame(ClassicRules(hintsPerGame = config.config.value.classicHintsPerGame))
 
         @Provides
         @Singleton

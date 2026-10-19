@@ -3,7 +3,10 @@
 An original casual block-puzzle game for Android: Kotlin, Jetpack Compose, ViewModel + StateFlow, Hilt and DataStore.
 It is built to play offline first. Firebase and ads are added in later phases, behind interfaces.
 
-> **Status: Phase 5 (Daily Challenge, progression, achievements, stats).** A date-generated daily puzzle,
+> **Status: Phase 6 (Firebase, switched off until configured).** Analytics, Crashlytics, conflict-safe
+> cloud backup (Firestore + anonymous Auth), Remote Config and App Check, all behind interfaces with offline
+> fallbacks; strict, tested security rules. Add `app/google-services.json` to enable (see [`docs/FIREBASE.md`](docs/FIREBASE.md)).
+> Phase 5 (Daily Challenge, progression, achievements, stats): A date-generated daily puzzle,
 > XP and player levels, 13 achievements and a Stats screen (see [`docs/PROGRESSION.md`](docs/PROGRESSION.md)).
 > Phase 4 (Level Mode): 50 bot-validated levels with line, score and gem goals, move-based
 > stars and Room-backed progress (see [`docs/LEVELS.md`](docs/LEVELS.md)).
@@ -65,5 +68,5 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the architecture and its 
 
 ## Firebase, ads and secrets
 
-Phase 1 has no Firebase or ads. When Firebase arrives in Phase 6, each developer adds their own `app/google-services.json`.
+Firebase is optional: each developer adds their own `app/google-services.json` (never committed) to enable it; without it the app runs fully offline. See [`docs/FIREBASE.md`](docs/FIREBASE.md). Ads are not integrated yet (Phase 7).
 That file is git-ignored. Keystores and `secrets.properties` are git-ignored too. No secrets go in the app or in Remote Config.

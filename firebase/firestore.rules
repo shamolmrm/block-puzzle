@@ -1,0 +1,37 @@
+rules_version = '2';
+
+// Puzzle Block Blast. The only data is each player's own progress backup (docs/FIREBASE.md).
+// Progress is cosmetic and private: there are no leaderboards, so no client-submitted score is
+// ever trusted for anything competitive. The app also sanitizes everything it reads back.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{uid}/progress/{docId} {
+      allow read: if isOwner(uid) && docId == 'main';
+      allow create, update: if isOwner(uid) && docId == 'main' && isValidProgress(request.resource.data);
+      allow delete: if isOwner(uid) && docId == 'main';
+    }
+
+    // Everything else is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+
+  function isOwner(uid) {
+    return request.auth != null && request.auth.uid == uid;
+  }
+
+  function isValidProgress(d) {
+    return d.keys().hasOnly(['schemaVersion', 'levels', 'daily', 'achievements', 'bests', 'counters', 'updatedAt'])
+      && d.keys().hasAll(['schemaVersion', 'levels', 'daily', 'achievements', 'bests', 'counters', 'updatedAt'])
+      && d.schemaVersion == 1
+      // Clients can't backdate or forge the write time.
+      && d.updatedAt == request.time
+      && d.levels is map && d.levels.size() <= 1000
+      && d.daily is map && d.daily.size() <= 5000
+      && d.achievements is map && d.achievements.size() <= 200
+      && d.counters is map && d.counters.size() <= 20
+      && d.bests is map && d.bests.keys().hasOnly(['best_classic_score', 'best_combo']);
+  }
+}

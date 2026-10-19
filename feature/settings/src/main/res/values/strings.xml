@@ -4,4 +4,16 @@
     <string name="settings_sound">Sound effects</string>
     <string name="settings_haptics">Vibration</string>
     <string name="settings_reduced_motion">Reduce motion</string>
+    <string name="settings_privacy">Privacy</string>
+    <string name="settings_share_usage">Share usage statistics</string>
+    <string name="settings_share_usage_detail">Anonymous gameplay events that help improve the game. No names or contacts.</string>
+    <string name="settings_share_crashes">Send crash reports</string>
+    <string name="settings_share_crashes_detail">Technical details when the app crashes, so it can be fixed.</string>
+    <string name="settings_backup">Cloud backup</string>
+    <string name="settings_backup_unavailable">Cloud backup isn\'t available in this version. Your progress is saved on this device.</string>
+    <string name="settings_backup_never">Not backed up yet.</string>
+    <string name="settings_backup_last">Last backed up %1$s.</string>
+    <string name="settings_backup_syncing">Backing up…</string>
+    <string name="settings_backup_failed">Couldn\'t back up right now. Your progress is safe on this device; it will retry automatically.</string>
+    <string name="settings_backup_now">Back up now</string>
 </resources>

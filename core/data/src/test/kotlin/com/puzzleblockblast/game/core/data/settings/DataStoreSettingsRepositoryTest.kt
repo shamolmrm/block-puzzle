@@ -29,9 +29,10 @@ class DataStoreSettingsRepositoryTest {
         repo.setSoundEnabled(false)
         repo.setHapticsEnabled(false)
         repo.setReducedMotion(true)
+        repo.setShareUsageData(false)
 
         assertThat(repo.settings.first()).isEqualTo(
-            UserSettings(soundEnabled = false, musicEnabled = true, hapticsEnabled = false, reducedMotion = true),
+            UserSettings(soundEnabled = false, hapticsEnabled = false, reducedMotion = true, shareUsageData = false),
         )
     }
 

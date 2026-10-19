@@ -99,8 +99,10 @@ fun HomeScreen(
                 PbbMenuButton(
                     stringResource(R.string.home_daily),
                     onPlayDaily,
+                    enabled = profile?.dailyEnabled != false,
                     supportingText = when {
                         profile == null -> null
+                        !profile.dailyEnabled -> stringResource(R.string.home_daily_unavailable)
                         profile.dailyDoneToday -> stringResource(R.string.home_daily_done)
                         else -> stringResource(R.string.home_daily_new)
                     },

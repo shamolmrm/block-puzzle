@@ -22,6 +22,11 @@ data class ClassicRules(
         require(traySize in 1..5)
         require(tileColors >= 1)
         require(maxComboHalves >= 2)
-        require(undosPerGame >= 0 && hintsPerGame >= 0 && fairDealAttempts >= 1)
+        require(undosPerGame >= 0 && hintsPerGame in 0..MAX_HINTS_PER_GAME && fairDealAttempts >= 1)
+    }
+
+    companion object {
+        /** Upper bound for any configured hint count (remote config clamps to this too). */
+        const val MAX_HINTS_PER_GAME = 5
     }
 }

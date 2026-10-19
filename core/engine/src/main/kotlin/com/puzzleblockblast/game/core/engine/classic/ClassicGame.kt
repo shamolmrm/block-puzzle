@@ -207,7 +207,9 @@ class ClassicGame(
                 (s.isGameOver || s.tray.any { it != null }) &&
                 s.board.toTileArray().all { it in 0..rules.tileColors } &&
                 s.score >= 0 && s.combo >= 0 && s.moves >= 0 && s.linesCleared >= 0 &&
-                s.undosRemaining in 0..rules.undosPerGame && s.hintsRemaining in 0..rules.hintsPerGame &&
+                // Hints use the global cap, not this run's value: a remote-config change between app
+                // starts must not invalidate a saved game.
+                s.undosRemaining in 0..rules.undosPerGame && s.hintsRemaining in 0..ClassicRules.MAX_HINTS_PER_GAME &&
                 Placement.findFullLines(s.board).isEmpty &&
                 (if (isSnapshot) s.previous == null else true)
         val previous = state.previous

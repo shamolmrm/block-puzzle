@@ -10,6 +10,8 @@ interface SettingsRepository {
     suspend fun setMusicEnabled(enabled: Boolean)
     suspend fun setHapticsEnabled(enabled: Boolean)
     suspend fun setReducedMotion(enabled: Boolean)
+    suspend fun setShareUsageData(enabled: Boolean)
+    suspend fun setShareCrashReports(enabled: Boolean)
 
     /** Whether the player has finished (or skipped) the first-run tutorial. */
     val tutorialCompleted: Flow<Boolean>

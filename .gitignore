@@ -24,3 +24,8 @@ local.properties
 
 # Local tooling
 .claude/settings.local.json
+
+# Firebase tooling (rules tests, emulators)
+firebase/node_modules/
+*-debug.log
+firebase/.firebase/

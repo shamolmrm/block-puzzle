@@ -12,6 +12,8 @@ import com.puzzleblockblast.game.core.model.progress.PlayerSnapshot
 import com.puzzleblockblast.game.core.model.progress.Progression
 import com.puzzleblockblast.game.core.model.progress.StatKeys
 import com.puzzleblockblast.game.core.model.progress.Streaks
+import com.puzzleblockblast.game.core.model.sync.CloudProgress
+import com.puzzleblockblast.game.core.data.sync.PeerCounterEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
@@ -56,23 +58,31 @@ interface ProgressionRepository {
     ): Reward
 }
 
+/** Told after each recorded result; the app uses it to schedule a cloud sync. */
+fun interface ProgressListener {
+    fun onProgressRecorded()
+}
+
 @Singleton
 class RoomProgressionRepository @Inject constructor(
     private val db: PbbDatabase,
     private val levels: LevelRepository,
+    private val listener: ProgressListener,
 ) : ProgressionRepository {
 
     private val dao = db.progressionDao()
     private val levelDao = db.levelProgressDao()
 
+    private val syncDao = db.syncDao()
+
     override fun snapshot(today: Long): Flow<PlayerSnapshot> = combine(
-        dao.observeCounters(),
+        combine(dao.observeCounters(), syncDao.observePeers(), ::Pair),
         levelDao.observeAll(),
         dao.observeDaily(),
         dao.observeUnlocks(),
         flow { emit(levels.levels().size) },
-    ) { counters, levelRows, daily, unlocks, levelCount ->
-        buildSnapshot(counters, levelRows.map { it.toModel() }, daily, unlocks, levelCount, today)
+    ) { (counters, peers), levelRows, daily, unlocks, levelCount ->
+        buildSnapshot(counters, peers, levelRows.map { it.toModel() }, daily, unlocks, levelCount, today)
     }
 
     override val dailyResults: Flow<Map<Long, DailyResult>> = dao.observeDaily().map { rows ->
@@ -86,7 +96,7 @@ class RoomProgressionRepository @Inject constructor(
             add(StatKeys.LINES_CLEARED, linesCleared.toLong())
             max(StatKeys.BEST_COMBO, bestCombo.toLong())
             award(Progression.classicGameXp(score), atMillis, today = null)
-        }
+        }.also { listener.onProgressRecorded() }
 
     override suspend fun recordDailyAttempt(epochDay: Long) = db.withTransaction {
         val current = dao.daily(epochDay) ?: DailyResultEntity(epochDay, 0, 0, 0, null)
@@ -125,13 +135,14 @@ class RoomProgressionRepository @Inject constructor(
             }
         }
         award(xp, atMillis, today)
-    }
+    }.also { listener.onProgressRecorded() }
 
     /** Adds [xp], then unlocks every achievement the new state meets. Call inside a transaction. */
     private suspend fun award(xp: Int, atMillis: Long, today: Long?): Reward {
         if (xp > 0) add(StatKeys.XP, xp.toLong())
         val snapshot = buildSnapshot(
             dao.counters(),
+            syncDao.peers(),
             levelDao.all().map { it.toModel() },
             dao.dailyResults(),
             dao.unlocks(),
@@ -156,13 +167,16 @@ class RoomProgressionRepository @Inject constructor(
 
 internal fun buildSnapshot(
     counters: List<StatCounterEntity>,
+    peers: List<PeerCounterEntity>,
     levelRows: List<LevelProgress>,
     daily: List<DailyResultEntity>,
     unlocks: List<AchievementUnlockEntity>,
     levelCount: Int,
     today: Long,
 ): PlayerSnapshot {
-    val values = counters.associate { it.name to it.value }
+    val values = counters.associate { it.name to it.value }.toMutableMap()
+    // Additive totals include what other devices earned (synced); bests are already merged locally.
+    peers.filter { it.name in CloudProgress.ADDITIVE }.forEach { values[it.name] = (values[it.name] ?: 0) + it.value }
     val completedDays = daily.filter { it.stars > 0 }.map { it.epochDay }
     return PlayerSnapshot(
         xp = values[StatKeys.XP] ?: 0,

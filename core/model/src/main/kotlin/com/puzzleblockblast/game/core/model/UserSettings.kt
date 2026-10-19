@@ -6,4 +6,8 @@ data class UserSettings(
     val musicEnabled: Boolean = true,
     val hapticsEnabled: Boolean = true,
     val reducedMotion: Boolean = false,
+    /** Anonymous usage analytics (Firebase Analytics when configured). */
+    val shareUsageData: Boolean = true,
+    /** Crash reports (Crashlytics when configured). */
+    val shareCrashReports: Boolean = true,
 )

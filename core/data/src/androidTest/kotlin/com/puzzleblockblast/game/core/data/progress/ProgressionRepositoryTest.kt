@@ -33,7 +33,7 @@ class ProgressionRepositoryTest {
     @Before
     fun setUp() {
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), PbbDatabase::class.java).build()
-        repository = RoomProgressionRepository(db, levels)
+        repository = RoomProgressionRepository(db, levels) {}
     }
 
     @After

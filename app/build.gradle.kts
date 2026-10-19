@@ -5,6 +5,13 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// Firebase is optional: with app/google-services.json (never committed) the plugins wire it up;
+// without it the app builds and runs fully offline. See docs/FIREBASE.md.
+if (file("google-services.json").exists()) {
+    apply(plugin = libs.plugins.google.services.get().pluginId)
+    apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
+}
+
 android {
     namespace = "com.puzzleblockblast.game"
 
@@ -32,6 +39,7 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:analytics"))
     implementation(project(":core:audio"))
+    implementation(project(":core:firebase"))
     implementation(project(":feature:home"))
     implementation(project(":feature:game"))
     implementation(project(":feature:levels"))

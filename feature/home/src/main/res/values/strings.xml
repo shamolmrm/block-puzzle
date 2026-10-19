@@ -9,6 +9,7 @@
     <string name="home_how_to_play">How to play</string>
     <string name="home_stats">Stats</string>
     <string name="home_daily_new">New today</string>
+    <string name="home_daily_unavailable">Unavailable</string>
     <string name="home_daily_done">✓ Done</string>
     <string name="home_level_badge">Lv %1$d</string>
     <string name="home_xp">%1$d / %2$d XP</string>

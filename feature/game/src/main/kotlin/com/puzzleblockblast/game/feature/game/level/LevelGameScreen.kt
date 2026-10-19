@@ -183,7 +183,7 @@ private fun ObjectiveChip(progress: ObjectiveProgress) {
     }
     val done = progress.isMet
     Text(
-        text = if (done) "âœ“ $label" else label,
+        text = if (done) "✓ $label" else label,
         style = MaterialTheme.typography.labelLarge,
         color = if (done) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onPrimaryContainer,
         modifier = Modifier
@@ -204,7 +204,7 @@ private fun StarRow(stars: Int) {
     ) {
         repeat(3) { i ->
             Text(
-                "â˜…",
+                "★",
                 fontSize = 44.sp,
                 color = if (i < stars) Color(0xFFFFC145) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
             )
