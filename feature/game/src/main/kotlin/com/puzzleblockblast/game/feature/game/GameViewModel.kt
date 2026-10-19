@@ -9,6 +9,9 @@ import com.puzzleblockblast.game.core.audio.Sound
 import com.puzzleblockblast.game.core.audio.SoundEffects
 import com.puzzleblockblast.game.core.data.classic.ClassicGameRepository
 import com.puzzleblockblast.game.core.data.di.ApplicationScope
+import com.puzzleblockblast.game.core.data.progress.ProgressionRepository
+import com.puzzleblockblast.game.core.data.progress.Reward
+import com.puzzleblockblast.game.core.data.time.WallClock
 import com.puzzleblockblast.game.core.data.settings.SettingsRepository
 import com.puzzleblockblast.game.core.engine.board.GridPoint
 import com.puzzleblockblast.game.core.engine.classic.ClassicGame
@@ -57,6 +60,8 @@ data class GameUiState(
     val settings: UserSettings = UserSettings(),
     /** Set by modes with their own end conditions (a won or failed level): blocks all input. */
     val isEnded: Boolean = false,
+    /** XP and achievements earned by the finished game, once recorded. */
+    val reward: Reward? = null,
 ) {
     val isPlaying: Boolean get() = game != null && !game.isGameOver && !isPaused && !isEnded
     val canUndo: Boolean get() = isPlaying && game?.canUndo == true
@@ -73,6 +78,8 @@ class GameViewModel @Inject constructor(
     @param:ApplicationScope private val appScope: CoroutineScope,
     settingsRepository: SettingsRepository,
     private val sounds: SoundEffects,
+    private val progression: ProgressionRepository,
+    private val clock: WallClock,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GameUiState())
@@ -80,6 +87,9 @@ class GameViewModel @Inject constructor(
 
     /** Best score when the current game started; decides "new best" at game over. */
     private var bestAtStart = 0
+
+    /** Highest combo in the current game (from this session; a resumed game starts at its current combo). */
+    private var bestCombo = 0
 
     /**
      * Writes run in order on the application scope, so a save requested just before the player
@@ -89,7 +99,8 @@ class GameViewModel @Inject constructor(
 
     private sealed interface Write {
         data class Save(val state: GameState) : Write
-        data class Finish(val score: Int) : Write
+        /** [seed] identifies the game, so its reward is only shown while that game is on screen. */
+        data class Finish(val score: Int, val lines: Int, val bestCombo: Int, val seed: Long) : Write
     }
 
     init {
@@ -97,7 +108,11 @@ class GameViewModel @Inject constructor(
             for (write in writes) {
                 when (write) {
                     is Write.Save -> repository.saveInProgress(write.state)
-                    is Write.Finish -> repository.finishGame(write.score)
+                    is Write.Finish -> {
+                        repository.finishGame(write.score)
+                        val reward = progression.recordClassicGame(write.score, write.lines, write.bestCombo, clock.nowMillis())
+                        _uiState.update { if (it.game?.seed == write.seed && it.game.isGameOver) it.copy(reward = reward) else it }
+                    }
                 }
             }
         }
@@ -109,6 +124,7 @@ class GameViewModel @Inject constructor(
             val restored = repository.loadInProgress()
             bestAtStart = best
             val state = restored ?: classic.newGame(seeds.nextSeed())
+            bestCombo = state.combo
             _uiState.update { it.copy(isLoading = false, bestScore = best).withGame(state) }
             logGameStarted(resumed = restored != null)
 
@@ -123,12 +139,13 @@ class GameViewModel @Inject constructor(
         val result = classic.place(state, Move(slot, origin)) as? MoveResult.Accepted ?: return
 
         val next = result.state
+        bestCombo = maxOf(bestCombo, result.outcome.score.combo)
         if (current.settings.soundEnabled) sounds.play(soundFor(result.outcome))
         if (next.isGameOver) {
             _uiState.update {
                 it.withGame(next).copy(lastOutcome = result.outcome, isNewBest = next.score > bestAtStart)
             }
-            writes.trySend(Write.Finish(next.score))
+            writes.trySend(Write.Finish(next.score, next.linesCleared, bestCombo, next.seed))
             analytics.log(
                 AnalyticsEvent(
                     AnalyticsEvents.GAME_OVER,
@@ -180,7 +197,8 @@ class GameViewModel @Inject constructor(
     fun onRestart() {
         val current = _uiState.value
         val state = current.game ?: return
-        if (!state.isGameOver) writes.trySend(Write.Finish(state.score))
+        if (!state.isGameOver) writes.trySend(Write.Finish(state.score, state.linesCleared, bestCombo, state.seed))
+        bestCombo = 0
         bestAtStart = current.displayBest
         _uiState.update {
             GameUiState(isLoading = false, bestScore = current.displayBest, settings = it.settings)

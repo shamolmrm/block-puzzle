@@ -9,13 +9,14 @@ import com.puzzleblockblast.game.core.engine.shape.ShapeCatalog
  * empty list means the level is safe to load. Winnability is checked separately by [LevelBot].
  */
 object LevelValidator {
-    private val ID_PATTERN = Regex("L\\d{4}")
+    /** Pack levels `L0001`; generated dailies `D` + epoch day. */
+    private val ID_PATTERN = Regex("L\\d{4}|D-?\\d{1,9}")
     const val MIN_BOARD = 8
     const val MAX_MOVES = 200
     const val MAX_ALLOWANCE = 3
 
     fun validate(level: LevelDefinition, catalog: ShapeCatalog = ShapeCatalog.Classic): List<String> = buildList {
-        if (!ID_PATTERN.matches(level.id)) add("id '${level.id}' must look like L0001")
+        if (!ID_PATTERN.matches(level.id)) add("id '${level.id}' must look like L0001 (or D<day> for a daily)")
         if (level.index < 1) add("index must be >= 1")
         val board = level.board
         if (board.rows != board.cols || board.rows !in MIN_BOARD..Board.CLASSIC_SIZE) {

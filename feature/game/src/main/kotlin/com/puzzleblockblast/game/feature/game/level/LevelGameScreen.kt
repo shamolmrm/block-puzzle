@@ -36,7 +36,13 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.puzzleblockblast.game.core.data.progress.Reward
+import com.puzzleblockblast.game.core.data.time.WallClock
 import com.puzzleblockblast.game.core.designsystem.component.PbbBackground
+import com.puzzleblockblast.game.core.designsystem.component.RewardSummary
+import java.text.DateFormat
+import java.util.Date
+import java.util.TimeZone
 import com.puzzleblockblast.game.core.engine.board.GridPoint
 import com.puzzleblockblast.game.core.engine.level.LevelResult
 import com.puzzleblockblast.game.core.engine.level.Objective
@@ -106,6 +112,8 @@ fun LevelGameScreen(
                 score = state.game.game?.score ?: 0,
                 moves = state.game.game?.moves ?: 0,
                 nextLevelId = state.nextLevelId,
+                isDaily = state.isDaily,
+                reward = state.reward,
                 onNext = onNextLevel,
                 onReplay = onRestart,
                 onLevels = onLevels,
@@ -130,7 +138,11 @@ private fun LevelHeader(state: LevelUiState, onPause: () -> Unit) {
         PauseButton(enabled = state.game.isPlaying, onPause = onPause)
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
-                stringResource(R.string.level_title, state.level?.index ?: 0),
+                if (state.dailyEpochDay != null) {
+                    stringResource(R.string.daily_title, formatEpochDay(state.dailyEpochDay))
+                } else {
+                    stringResource(R.string.level_title, state.level?.index ?: 0)
+                },
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.semantics { heading() },
             )
@@ -171,7 +183,7 @@ private fun ObjectiveChip(progress: ObjectiveProgress) {
     }
     val done = progress.isMet
     Text(
-        text = if (done) "✓ $label" else label,
+        text = if (done) "âœ“ $label" else label,
         style = MaterialTheme.typography.labelLarge,
         color = if (done) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onPrimaryContainer,
         modifier = Modifier
@@ -192,7 +204,7 @@ private fun StarRow(stars: Int) {
     ) {
         repeat(3) { i ->
             Text(
-                "★",
+                "â˜…",
                 fontSize = 44.sp,
                 color = if (i < stars) Color(0xFFFFC145) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
             )
@@ -206,6 +218,8 @@ private fun LevelCompleteOverlay(
     score: Int,
     moves: Int,
     nextLevelId: String?,
+    isDaily: Boolean,
+    reward: Reward?,
     onNext: (String) -> Unit,
     onReplay: () -> Unit,
     onLevels: () -> Unit,
@@ -222,7 +236,10 @@ private fun LevelCompleteOverlay(
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
         )
-        if (nextLevelId != null) {
+        if (reward != null) RewardSummary(reward.xp, reward.newAchievements)
+        if (isDaily) {
+            Text(stringResource(R.string.daily_come_back), style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
+        } else if (nextLevelId != null) {
             Button(onClick = { onNext(nextLevelId) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.level_next))
             }
@@ -270,3 +287,8 @@ private fun LevelUnavailable(onLevels: () -> Unit, modifier: Modifier = Modifier
         }
     }
 }
+
+/** Formats an epoch day (a calendar date, no time zone) in the user's locale, e.g. "Oct 19, 2026". */
+internal fun formatEpochDay(epochDay: Long): String =
+    DateFormat.getDateInstance(DateFormat.MEDIUM).apply { timeZone = TimeZone.getTimeZone("UTC") }
+        .format(Date(epochDay * WallClock.MILLIS_PER_DAY))

@@ -1,11 +1,9 @@
 package com.puzzleblockblast.game.core.data.level
 
 import androidx.room.Dao
-import androidx.room.Database
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Query
-import androidx.room.RoomDatabase
 import androidx.room.Transaction
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
@@ -27,6 +25,9 @@ abstract class LevelProgressDao {
     @Query("SELECT * FROM level_progress")
     abstract fun observeAll(): Flow<List<LevelProgressEntity>>
 
+    @Query("SELECT * FROM level_progress")
+    abstract suspend fun all(): List<LevelProgressEntity>
+
     @Query("SELECT * FROM level_progress WHERE levelId = :levelId")
     abstract suspend fun get(levelId: String): LevelProgressEntity?
 
@@ -39,11 +40,6 @@ abstract class LevelProgressDao {
         val current = get(levelId)?.toModel() ?: LevelProgress(levelId)
         upsert(transform(current).toEntity())
     }
-}
-
-@Database(entities = [LevelProgressEntity::class], version = 1, exportSchema = true)
-abstract class PbbDatabase : RoomDatabase() {
-    abstract fun levelProgressDao(): LevelProgressDao
 }
 
 interface LevelProgressRepository {

@@ -11,11 +11,15 @@ import com.puzzleblockblast.game.core.audio.SoundEffects
 import com.puzzleblockblast.game.core.data.di.ApplicationScope
 import com.puzzleblockblast.game.core.data.level.LevelProgressRepository
 import com.puzzleblockblast.game.core.data.level.LevelRepository
+import com.puzzleblockblast.game.core.data.progress.ProgressionRepository
+import com.puzzleblockblast.game.core.data.progress.Reward
 import com.puzzleblockblast.game.core.data.settings.SettingsRepository
+import com.puzzleblockblast.game.core.data.time.WallClock
 import com.puzzleblockblast.game.core.engine.board.GridPoint
 import com.puzzleblockblast.game.core.engine.classic.HintResult
 import com.puzzleblockblast.game.core.engine.classic.Move
 import com.puzzleblockblast.game.core.engine.classic.MoveOutcome
+import com.puzzleblockblast.game.core.engine.level.DailyChallenge
 import com.puzzleblockblast.game.core.engine.level.LevelDefinition
 import com.puzzleblockblast.game.core.engine.level.LevelGame
 import com.puzzleblockblast.game.core.engine.level.LevelMoveResult
@@ -25,7 +29,6 @@ import com.puzzleblockblast.game.core.engine.level.ObjectiveProgress
 import com.puzzleblockblast.game.core.model.GameMode
 import com.puzzleblockblast.game.feature.game.GameMessage
 import com.puzzleblockblast.game.feature.game.GameUiState
-import com.puzzleblockblast.game.feature.game.WallClock
 import com.puzzleblockblast.game.feature.game.soundFor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -41,22 +44,30 @@ data class LevelUiState(
     val level: LevelDefinition? = null,
     /** The requested level isn't in the content (e.g. a stale link): show an error, not a crash. */
     val notFound: Boolean = false,
+    /** Set for a Daily Challenge: its epoch day. */
+    val dailyEpochDay: Long? = null,
     val result: LevelResult = LevelResult.IN_PROGRESS,
     val objectives: List<ObjectiveProgress> = emptyList(),
     val movesLeft: Int = 0,
     val stars: Int = 0,
     val nextLevelId: String? = null,
-)
+    /** XP and achievements earned by the finished attempt, once recorded. */
+    val reward: Reward? = null,
+) {
+    val isDaily: Boolean get() = dailyEpochDay != null
+}
 
 /**
- * Plays one level. An unfinished level is not saved: levels are short, and leaving restarts the
- * attempt. Results are written on the application scope so leaving the screen can't drop them.
+ * Plays one pack level or a Daily Challenge (level id `D<epoch day>`, generated on the device). An
+ * unfinished attempt is not saved: levels are short, and leaving restarts it. Results are written
+ * on the application scope so leaving the screen can't drop them.
  */
 @HiltViewModel
 class LevelGameViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val levels: LevelRepository,
     private val progress: LevelProgressRepository,
+    private val progression: ProgressionRepository,
     private val analytics: AnalyticsTracker,
     private val sounds: SoundEffects,
     private val clock: WallClock,
@@ -65,27 +76,33 @@ class LevelGameViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val levelId: String = requireNotNull(savedStateHandle[LEVEL_ID_KEY]) { "levelId missing" }
+    private val dailyDay: Long? = DailyChallenge.epochDayOf(levelId)
 
-    private val _uiState = MutableStateFlow(LevelUiState())
+    private val _uiState = MutableStateFlow(LevelUiState(dailyEpochDay = dailyDay))
     val uiState: StateFlow<LevelUiState> = _uiState.asStateFlow()
 
     private var engine: LevelGame? = null
     private var current: LevelState? = null
+    private var bestCombo = 0
 
     init {
         viewModelScope.launch {
             settingsRepository.settings.collect { s -> _uiState.update { it.copy(game = it.game.copy(settings = s)) } }
         }
         viewModelScope.launch {
-            val all = levels.levels()
-            val index = all.indexOfFirst { it.id == levelId }
-            if (index < 0) {
+            val (level, next) = if (dailyDay != null) {
+                DailyChallenge.levelFor(dailyDay) to null
+            } else {
+                val all = levels.levels()
+                val index = all.indexOfFirst { it.id == levelId }
+                all.getOrNull(index) to all.getOrNull(index + 1)?.id
+            }
+            if (level == null) {
                 _uiState.update { it.copy(notFound = true, game = it.game.copy(isLoading = false)) }
                 return@launch
             }
-            val level = all[index]
             engine = LevelGame(level)
-            _uiState.update { it.copy(level = level, nextLevelId = all.getOrNull(index + 1)?.id) }
+            _uiState.update { it.copy(level = level, nextLevelId = next) }
             startAttempt()
         }
     }
@@ -96,6 +113,7 @@ class LevelGameViewModel @Inject constructor(
         if (!_uiState.value.game.isPlaying) return
         val result = game.place(state, Move(slot, origin)) as? LevelMoveResult.Accepted ?: return
         val next = result.state
+        bestCombo = maxOf(bestCombo, result.outcome.score.combo)
 
         if (_uiState.value.game.settings.soundEnabled) {
             sounds.play(
@@ -107,14 +125,7 @@ class LevelGameViewModel @Inject constructor(
             )
         }
         publish(next, result.outcome)
-        when (next.result) {
-            LevelResult.WON -> recordWin(game, next)
-            LevelResult.OUT_OF_MOVES, LevelResult.NO_MOVES -> logLevel(
-                AnalyticsEvents.LEVEL_FAILED,
-                AnalyticsEvents.Params.REASON to next.result.name.lowercase(),
-            )
-            LevelResult.IN_PROGRESS -> Unit
-        }
+        if (next.isFinished) recordEnd(game, next)
     }
 
     fun onUndo() {
@@ -159,17 +170,39 @@ class LevelGameViewModel @Inject constructor(
 
     private fun startAttempt() {
         val game = engine ?: return
+        bestCombo = 0
+        _uiState.update { it.copy(reward = null) }
         publish(game.start(), outcome = null)
-        appScope.launch { progress.recordAttempt(levelId) }
+        appScope.launch {
+            if (dailyDay != null) progression.recordDailyAttempt(dailyDay) else progress.recordAttempt(levelId)
+        }
         logLevel(AnalyticsEvents.LEVEL_STARTED)
     }
 
-    private fun recordWin(game: LevelGame, state: LevelState) {
+    private fun recordEnd(game: LevelGame, state: LevelState) {
         val stars = game.stars(state)
         val score = state.game.score
+        val lines = state.game.linesCleared
+        val combo = bestCombo
         val at = clock.nowMillis()
-        appScope.launch { progress.recordWin(levelId, stars, score, at) }
-        logLevel(AnalyticsEvents.LEVEL_COMPLETED, AnalyticsEvents.Params.STARS to stars, AnalyticsEvents.Params.MOVES to state.game.moves)
+        val today = clock.todayEpochDay()
+        appScope.launch {
+            val reward = progression.recordLevelEnd(levelId, stars, score, lines, combo, at, today)
+            // Only attach the reward if the player hasn't already started another attempt.
+            _uiState.update { if (it.result == state.result && it.game.game == state.game) it.copy(reward = reward) else it }
+        }
+        when {
+            state.result != LevelResult.WON -> logLevel(
+                AnalyticsEvents.LEVEL_FAILED,
+                AnalyticsEvents.Params.REASON to state.result.name.lowercase(),
+            )
+            dailyDay != null -> logLevel(AnalyticsEvents.DAILY_CHALLENGE_COMPLETED, AnalyticsEvents.Params.STARS to stars)
+            else -> logLevel(
+                AnalyticsEvents.LEVEL_COMPLETED,
+                AnalyticsEvents.Params.STARS to stars,
+                AnalyticsEvents.Params.MOVES to state.game.moves,
+            )
+        }
     }
 
     private fun publish(state: LevelState, outcome: MoveOutcome?) {
@@ -198,12 +231,15 @@ class LevelGameViewModel @Inject constructor(
         _uiState.update { it.copy(game = it.game.copy(message = message)) }
     }
 
-    private fun logLevel(name: String, vararg extra: Pair<String, Any>) = analytics.log(
-        AnalyticsEvent(
-            name,
-            mapOf(AnalyticsEvents.Params.MODE to GameMode.LEVEL.analyticsName, AnalyticsEvents.Params.LEVEL_ID to levelId) + extra,
-        ),
-    )
+    private fun logLevel(name: String, vararg extra: Pair<String, Any>) {
+        val mode = if (dailyDay != null) GameMode.DAILY else GameMode.LEVEL
+        analytics.log(
+            AnalyticsEvent(
+                name,
+                mapOf(AnalyticsEvents.Params.MODE to mode.analyticsName, AnalyticsEvents.Params.LEVEL_ID to levelId) + extra,
+            ),
+        )
+    }
 
     companion object {
         /** Matches the `levelId` property of the navigation route. */

@@ -1,0 +1,21 @@
+<resources>
+    <string name="stats_title">Stats</string>
+    <string name="stats_back">Back</string>
+    <string name="stats_player_level">Level %1$d</string>
+    <string name="stats_xp">%1$d / %2$d XP to next level · %3$d XP total</string>
+    <string name="stats_classic">Classic</string>
+    <string name="stats_games">Games played</string>
+    <string name="stats_best_score">Best score</string>
+    <string name="stats_best_combo">Best combo</string>
+    <string name="stats_lines">Lines cleared (all modes)</string>
+    <string name="stats_levels">Levels</string>
+    <string name="stats_levels_done">Completed</string>
+    <string name="stats_stars">Stars</string>
+    <string name="stats_daily">Daily Challenge</string>
+    <string name="stats_daily_done">Days completed</string>
+    <string name="stats_streak">Current streak</string>
+    <string name="stats_best_streak">Best streak</string>
+    <string name="stats_achievements">Achievements %1$d / %2$d</string>
+    <string name="stats_unlocked">Unlocked</string>
+    <string name="stats_progress">%1$d/%2$d</string>
+</resources>

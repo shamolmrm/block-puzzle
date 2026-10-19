@@ -281,6 +281,7 @@ fun GameScreen(
                     score = game.score,
                     best = state.displayBest,
                     isNewBest = state.isNewBest,
+                    reward = state.reward,
                     onPlayAgain = onRestart,
                     onHome = onHome,
                 )

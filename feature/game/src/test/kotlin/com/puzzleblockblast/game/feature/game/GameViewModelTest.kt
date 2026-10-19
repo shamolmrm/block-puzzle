@@ -14,6 +14,9 @@ import com.puzzleblockblast.game.core.testing.FakeAnalyticsTracker
 import com.puzzleblockblast.game.core.audio.Sound
 import com.puzzleblockblast.game.core.model.UserSettings
 import com.puzzleblockblast.game.core.testing.FakeClassicGameRepository
+import com.puzzleblockblast.game.core.testing.FakeProgressionRepository
+import com.puzzleblockblast.game.core.testing.FakeWallClock
+import com.puzzleblockblast.game.core.data.progress.Reward
 import com.puzzleblockblast.game.core.testing.FakeSettingsRepository
 import com.puzzleblockblast.game.core.testing.FakeSoundEffects
 import com.puzzleblockblast.game.core.testing.MainDispatcherRule
@@ -32,6 +35,7 @@ class GameViewModelTest {
     private val analytics = FakeAnalyticsTracker()
     private val settings = FakeSettingsRepository()
     private val sounds = FakeSoundEffects()
+    private val progression = FakeProgressionRepository()
     private var nextSeed = 100L
 
     private fun viewModel(repo: FakeClassicGameRepository = repository, seeds: SeedSource = SeedSource { nextSeed++ }) =
@@ -43,6 +47,8 @@ class GameViewModelTest {
             appScope = CoroutineScope(mainDispatcher.dispatcher),
             settingsRepository = settings,
             sounds = sounds,
+            progression = progression,
+            clock = FakeWallClock(),
         )
 
     private val GameViewModel.game: GameState get() = requireNotNull(uiState.value.game)
@@ -204,6 +210,30 @@ class GameViewModelTest {
 
         assertThat(vm.uiState.value.isNewBest).isFalse()
         assertThat(vm.uiState.value.displayBest).isEqualTo(10_000)
+    }
+
+    @Test
+    fun gameOverRecordsProgressionAndShowsTheReward() {
+        progression.nextReward = Reward(xp = 12, newAchievements = listOf("first_game"))
+        runBlocking { repository.saveInProgress(almostOverState(score = 250)) }
+        val vm = viewModel()
+
+        vm.onPlace(slot = 0, origin = GridPoint(0, 1))
+
+        assertThat(progression.classicGames).containsExactly(251)
+        assertThat(vm.uiState.value.reward).isEqualTo(Reward(12, listOf("first_game")))
+    }
+
+    @Test
+    fun abandonedGameIsRecordedButItsRewardIsNotShownOnTheNewGame() {
+        progression.nextReward = Reward(xp = 5)
+        val vm = viewModel()
+        vm.playBestMove()
+
+        vm.onRestart()
+
+        assertThat(progression.classicGames).hasSize(1)
+        assertThat(vm.uiState.value.reward).isNull()
     }
 
     @Test

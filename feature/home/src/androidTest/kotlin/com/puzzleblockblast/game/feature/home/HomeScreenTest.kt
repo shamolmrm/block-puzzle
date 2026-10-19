@@ -1,5 +1,6 @@
 package com.puzzleblockblast.game.feature.home
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -7,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.puzzleblockblast.game.core.designsystem.theme.PbbTheme
+import com.puzzleblockblast.game.core.model.progress.PlayerLevel
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -19,25 +21,28 @@ class HomeScreenTest {
     val compose = createComposeRule()
 
     @Test
-    fun classicAndLevelsAreEnabledAndOtherModesAreComingSoon() {
-        var classicClicks = 0
-        var levelClicks = 0
+    fun playableModesAreEnabledAndEventsAreComingSoon() {
+        val clicks = mutableListOf<String>()
         compose.setContent {
             PbbTheme {
                 HomeScreen(
-                    onPlayClassic = { classicClicks++ },
-                    onPlayLevels = { levelClicks++ },
+                    onPlayClassic = { clicks += "classic" },
+                    onPlayLevels = { clicks += "levels" },
+                    onPlayDaily = { clicks += "daily" },
+                    onOpenStats = { clicks += "stats" },
                     onOpenSettings = {},
                     onHowToPlay = {},
+                    profile = HomeProfile(PlayerLevel(3, 40, 200), dailyDoneToday = true, streak = 2),
                 )
             }
         }
 
         compose.onNodeWithText("Classic").assertIsEnabled().performClick()
         compose.onNodeWithText("Levels").assertIsEnabled().performClick()
-        compose.onNodeWithText("Daily Challenge", substring = true).assertIsNotEnabled()
+        compose.onNodeWithText("Daily Challenge", substring = true).assertIsEnabled().performClick()
+        compose.onNodeWithText("✓ Done", substring = true).assertIsDisplayed()
         compose.onNodeWithText("Events", substring = true).assertIsNotEnabled()
-        assertEquals(1, classicClicks)
-        assertEquals(1, levelClicks)
+        compose.onNodeWithText("Stats").performClick()
+        assertEquals(listOf("classic", "levels", "daily", "stats"), clicks)
     }
 }

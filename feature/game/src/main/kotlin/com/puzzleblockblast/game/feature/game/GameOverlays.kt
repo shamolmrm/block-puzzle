@@ -9,6 +9,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import com.puzzleblockblast.game.core.data.progress.Reward
+import com.puzzleblockblast.game.core.designsystem.component.RewardSummary
 import com.puzzleblockblast.game.core.designsystem.theme.LocalReducedMotion
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -102,7 +104,14 @@ internal fun PauseOverlay(onResume: () -> Unit, onRestart: () -> Unit, onHome: (
 }
 
 @Composable
-internal fun GameOverOverlay(score: Int, best: Int, isNewBest: Boolean, onPlayAgain: () -> Unit, onHome: () -> Unit) {
+internal fun GameOverOverlay(
+    score: Int,
+    best: Int,
+    isNewBest: Boolean,
+    reward: Reward?,
+    onPlayAgain: () -> Unit,
+    onHome: () -> Unit,
+) {
     OverlayScrim {
         Text(
             stringResource(R.string.game_over_title),
@@ -123,6 +132,7 @@ internal fun GameOverOverlay(score: Int, best: Int, isNewBest: Boolean, onPlayAg
         } else {
             Text(stringResource(R.string.game_over_best, best), style = MaterialTheme.typography.titleMedium)
         }
+        if (reward != null) RewardSummary(reward.xp, reward.newAchievements)
         OverlayButton(stringResource(R.string.game_play_again), onPlayAgain, primary = true)
         OverlayButton(stringResource(R.string.game_home), onHome)
     }

@@ -7,6 +7,16 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,14 +49,18 @@ import com.puzzleblockblast.game.core.designsystem.component.PbbMenuButton
 import com.puzzleblockblast.game.core.designsystem.component.drawBlock
 import com.puzzleblockblast.game.core.designsystem.theme.LocalReducedMotion
 import com.puzzleblockblast.game.core.designsystem.theme.PbbTheme
+import com.puzzleblockblast.game.core.model.progress.PlayerLevel
 
 @Composable
 fun HomeScreen(
     onPlayClassic: () -> Unit,
     onPlayLevels: () -> Unit,
+    onPlayDaily: () -> Unit,
+    onOpenStats: () -> Unit,
     onOpenSettings: () -> Unit,
     onHowToPlay: () -> Unit,
     modifier: Modifier = Modifier,
+    profile: HomeProfile? = null,
 ) {
     val comingSoon = stringResource(R.string.home_coming_soon)
     PbbBackground(modifier = modifier) {
@@ -59,6 +73,7 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
         ) {
+            if (profile != null) ProfileBadge(profile, onOpenStats)
             BlockLogo()
             Spacer(Modifier.height(8.dp))
             Text(
@@ -80,9 +95,17 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 PbbMenuButton(text = stringResource(R.string.home_classic), onClick = onPlayClassic, hero = true)
-                // Implemented in later phases; visible but disabled so the menu layout is final.
                 PbbMenuButton(stringResource(R.string.home_levels), onPlayLevels)
-                PbbMenuButton(stringResource(R.string.home_daily), {}, enabled = false, supportingText = comingSoon)
+                PbbMenuButton(
+                    stringResource(R.string.home_daily),
+                    onPlayDaily,
+                    supportingText = when {
+                        profile == null -> null
+                        profile.dailyDoneToday -> stringResource(R.string.home_daily_done)
+                        else -> stringResource(R.string.home_daily_new)
+                    },
+                )
+                // Events come later; visible but disabled so the menu layout is final.
                 PbbMenuButton(stringResource(R.string.home_events), {}, enabled = false, supportingText = comingSoon)
                 Row(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -90,6 +113,9 @@ fun HomeScreen(
                 ) {
                     TextButton(onClick = onHowToPlay) {
                         Text(stringResource(R.string.home_how_to_play), style = MaterialTheme.typography.titleMedium)
+                    }
+                    TextButton(onClick = onOpenStats) {
+                        Text(stringResource(R.string.home_stats), style = MaterialTheme.typography.titleMedium)
                     }
                     TextButton(onClick = onOpenSettings) {
                         Text(stringResource(R.string.home_settings), style = MaterialTheme.typography.titleMedium)
@@ -132,5 +158,60 @@ private fun BlockLogo() {
 @Preview
 @Composable
 private fun HomeScreenPreview() {
-    PbbTheme { HomeScreen(onPlayClassic = {}, onPlayLevels = {}, onOpenSettings = {}, onHowToPlay = {}) }
+    PbbTheme { HomeScreen(
+            onPlayClassic = {},
+            onPlayLevels = {},
+            onPlayDaily = {},
+            onOpenStats = {},
+            onOpenSettings = {},
+            onHowToPlay = {},
+            profile = HomeProfile(PlayerLevel(4, 60, 250), dailyDoneToday = false, streak = 3),
+        ) }
+}
+
+/** Player level, XP towards the next level and daily streak; tapping opens Stats. */
+@Composable
+private fun ProfileBadge(profile: HomeProfile, onOpenStats: () -> Unit) {
+    val level = profile.level
+    val description = stringResource(R.string.home_profile_description, level.level, level.xpIntoLevel, level.xpForNext, profile.streak)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .widthIn(max = 420.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.2f))
+            .clickable(onClick = onOpenStats)
+            .padding(horizontal = 16.dp, vertical = 10.dp)
+            .clearAndSetSemantics {
+                contentDescription = description
+                role = Role.Button
+            },
+    ) {
+        Text(
+            stringResource(R.string.home_level_badge, level.level),
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
+            color = MaterialTheme.colorScheme.onSecondary,
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(50))
+                .padding(horizontal = 12.dp, vertical = 4.dp),
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            LinearProgressIndicator(
+                progress = { level.fraction },
+                modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(50)),
+                color = MaterialTheme.colorScheme.tertiary,
+                trackColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f),
+                drawStopIndicator = {},
+            )
+            Text(
+                stringResource(R.string.home_xp, level.xpIntoLevel, level.xpForNext),
+                style = MaterialTheme.typography.labelMedium,
+            )
+        }
+        if (profile.streak > 0) {
+            Text(stringResource(R.string.home_streak, profile.streak), style = MaterialTheme.typography.titleMedium)
+        }
+    }
 }

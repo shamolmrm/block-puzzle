@@ -12,7 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.puzzleblockblast.game.core.designsystem.theme.LocalReducedMotion
+import com.puzzleblockblast.game.core.engine.level.DailyChallenge
 import com.puzzleblockblast.game.feature.game.navigation.ClassicGameRoute
+import com.puzzleblockblast.game.feature.stats.navigation.StatsDestination
+import com.puzzleblockblast.game.feature.stats.navigation.statsScreen
 import com.puzzleblockblast.game.feature.game.navigation.LevelPlayRoute
 import com.puzzleblockblast.game.feature.game.navigation.levelPlayScreen
 import com.puzzleblockblast.game.feature.levels.navigation.LevelSelectDestination
@@ -46,6 +49,9 @@ fun PbbNavHost(tutorialCompleted: Boolean, modifier: Modifier = Modifier) {
                 navController.navigate(destination) { launchSingleTop = true }
             },
             onPlayLevels = { navController.navigate(LevelSelectDestination) { launchSingleTop = true } },
+            // The Daily Challenge is a generated level with id D<epoch day>, played on the level screen.
+            onPlayDaily = { day -> navController.navigate(LevelPlayRoute(DailyChallenge.idFor(day))) { launchSingleTop = true } },
+            onOpenStats = { navController.navigate(StatsDestination) { launchSingleTop = true } },
             onOpenSettings = { navController.navigate(SettingsDestination) { launchSingleTop = true } },
             onHowToPlay = { navController.navigate(TutorialDestination(thenPlay = false)) { launchSingleTop = true } },
         )
@@ -53,8 +59,12 @@ fun PbbNavHost(tutorialCompleted: Boolean, modifier: Modifier = Modifier) {
             onOpenLevel = { id -> navController.navigate(LevelPlayRoute(id)) { launchSingleTop = true } },
             onBack = navController::popBackStack,
         )
+        statsScreen(onBack = navController::popBackStack)
         levelPlayScreen(
-            onLevels = { navController.popBackStack(LevelSelectDestination, inclusive = false) },
+            // From a daily there is no level list on the stack: popBackStack falls back to Home.
+            onLevels = {
+                if (!navController.popBackStack(LevelSelectDestination, inclusive = false)) navController.popBackStack()
+            },
             // "Next level" replaces the finished level, so Back still returns to the level list.
             onNextLevel = { id ->
                 navController.navigate(LevelPlayRoute(id)) {

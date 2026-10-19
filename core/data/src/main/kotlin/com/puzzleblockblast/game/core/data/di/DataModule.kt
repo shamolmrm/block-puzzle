@@ -15,6 +15,10 @@ import com.puzzleblockblast.game.core.data.level.LevelProgressRepository
 import com.puzzleblockblast.game.core.data.level.LevelRepository
 import com.puzzleblockblast.game.core.data.level.PbbDatabase
 import com.puzzleblockblast.game.core.data.level.RoomLevelProgressRepository
+import com.puzzleblockblast.game.core.data.progress.ProgressionRepository
+import com.puzzleblockblast.game.core.data.progress.RoomProgressionRepository
+import com.puzzleblockblast.game.core.data.time.SystemWallClock
+import com.puzzleblockblast.game.core.data.time.WallClock
 import com.puzzleblockblast.game.core.data.settings.DataStoreSettingsRepository
 import com.puzzleblockblast.game.core.data.settings.SettingsDataStore
 import com.puzzleblockblast.game.core.data.settings.SettingsRepository
@@ -48,11 +52,17 @@ abstract class DataModule {
     @Binds
     abstract fun bindLevelProgressRepository(impl: RoomLevelProgressRepository): LevelProgressRepository
 
+    @Binds
+    abstract fun bindProgressionRepository(impl: RoomProgressionRepository): ProgressionRepository
+
+    @Binds
+    abstract fun bindWallClock(impl: SystemWallClock): WallClock
+
     companion object {
         @Provides
         @Singleton
         fun provideDatabase(@ApplicationContext context: Context): PbbDatabase =
-            Room.databaseBuilder(context, PbbDatabase::class.java, "pbb.db").build()
+            Room.databaseBuilder(context, PbbDatabase::class.java, PbbDatabase.NAME).build()
 
         @Provides
         fun provideLevelProgressDao(db: PbbDatabase): LevelProgressDao = db.levelProgressDao()

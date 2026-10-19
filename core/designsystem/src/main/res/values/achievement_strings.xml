@@ -1,0 +1,30 @@
+<resources>
+    <string name="achievement_first_game_title">First Steps</string>
+    <string name="achievement_first_game_desc">Finish a Classic game</string>
+    <string name="achievement_classic_500_title">Rising Star</string>
+    <string name="achievement_classic_500_desc">Score 500 in Classic</string>
+    <string name="achievement_classic_2000_title">High Roller</string>
+    <string name="achievement_classic_2000_desc">Score 2,000 in Classic</string>
+    <string name="achievement_combo_4_title">Chain Reaction</string>
+    <string name="achievement_combo_4_desc">Reach a ×4 combo streak</string>
+    <string name="achievement_lines_100_title">Line Cleaner</string>
+    <string name="achievement_lines_100_desc">Clear 100 lines</string>
+    <string name="achievement_lines_1000_title">Line Legend</string>
+    <string name="achievement_lines_1000_desc">Clear 1,000 lines</string>
+    <string name="achievement_level_first_title">Level Up</string>
+    <string name="achievement_level_first_desc">Complete your first level</string>
+    <string name="achievement_levels_10_title">Explorer</string>
+    <string name="achievement_levels_10_desc">Complete 10 levels</string>
+    <string name="achievement_levels_all_title">Completionist</string>
+    <string name="achievement_levels_all_desc">Complete all 50 levels</string>
+    <string name="achievement_stars_100_title">Star Collector</string>
+    <string name="achievement_stars_100_desc">Earn 100 level stars</string>
+    <string name="achievement_daily_first_title">Daily Player</string>
+    <string name="achievement_daily_first_desc">Complete a Daily Challenge</string>
+    <string name="achievement_daily_streak_7_title">On a Roll</string>
+    <string name="achievement_daily_streak_7_desc">Complete Daily Challenges 7 days in a row</string>
+    <string name="achievement_player_level_10_title">Seasoned</string>
+    <string name="achievement_player_level_10_desc">Reach player level 10</string>
+    <string name="achievement_unlocked">Achievement unlocked: %1$s</string>
+    <string name="xp_gained">+%1$d XP</string>
+</resources>

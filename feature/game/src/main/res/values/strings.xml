@@ -62,4 +62,6 @@
     <string name="level_failed_body">So close! Every level can be beaten. Try a different opening.</string>
     <string name="level_retry">Try again</string>
     <string name="level_unavailable">This level isn\'t available.</string>
+    <string name="daily_title">Daily · %1$s</string>
+    <string name="daily_come_back">A new Daily Challenge arrives tomorrow.</string>
 </resources>

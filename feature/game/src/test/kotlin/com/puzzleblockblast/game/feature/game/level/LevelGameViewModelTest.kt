@@ -12,6 +12,9 @@ import com.puzzleblockblast.game.core.engine.level.Objective
 import com.puzzleblockblast.game.core.testing.FakeAnalyticsTracker
 import com.puzzleblockblast.game.core.testing.FakeLevelProgressRepository
 import com.puzzleblockblast.game.core.testing.FakeLevelRepository
+import com.puzzleblockblast.game.core.testing.FakeProgressionRepository
+import com.puzzleblockblast.game.core.testing.FakeWallClock
+import com.puzzleblockblast.game.core.engine.level.DailyChallenge
 import com.puzzleblockblast.game.core.testing.FakeSettingsRepository
 import com.puzzleblockblast.game.core.testing.FakeSoundEffects
 import com.puzzleblockblast.game.core.testing.MainDispatcherRule
@@ -48,14 +51,16 @@ class LevelGameViewModelTest {
     private val progress = FakeLevelProgressRepository()
     private val analytics = FakeAnalyticsTracker()
     private val sounds = FakeSoundEffects()
+    private val progression = FakeProgressionRepository()
 
     private fun viewModel(id: String = "L0001") = LevelGameViewModel(
         savedStateHandle = SavedStateHandle(mapOf(LevelGameViewModel.LEVEL_ID_KEY to id)),
         levels = levels,
         progress = progress,
+        progression = progression,
         analytics = analytics,
         sounds = sounds,
-        clock = { 42L },
+        clock = FakeWallClock(now = 42L),
         settingsRepository = FakeSettingsRepository(),
         appScope = CoroutineScope(mainDispatcher.dispatcher),
     )
@@ -83,8 +88,8 @@ class LevelGameViewModelTest {
         assertThat(state.result).isEqualTo(LevelResult.WON)
         assertThat(state.stars).isEqualTo(3)
         assertThat(state.game.isPlaying).isFalse()
-        assertThat(progress.current.getValue("L0001").stars).isEqualTo(3)
-        assertThat(progress.current.getValue("L0001").completedAtMillis).isEqualTo(42L)
+        assertThat(progression.levelEnds.single()).isEqualTo(FakeProgressionRepository.LevelEnd("L0001", 3, 11, 1, 1))
+        assertThat(state.reward).isEqualTo(progression.nextReward)
         assertThat(sounds.played.last()).isEqualTo(Sound.BOARD_CLEAR)
         val completed = analytics.events.last()
         assertThat(completed.name).isEqualTo(AnalyticsEvents.LEVEL_COMPLETED)
@@ -102,7 +107,7 @@ class LevelGameViewModelTest {
         vm.onPlace(0, GridPoint(5, 5))
 
         assertThat(vm.uiState.value.result).isEqualTo(LevelResult.OUT_OF_MOVES)
-        assertThat(progress.current.getValue("L0002").isCompleted).isFalse()
+        assertThat(progression.levelEnds.single().stars).isEqualTo(0)
         assertThat(analytics.events.last().name).isEqualTo(AnalyticsEvents.LEVEL_FAILED)
         assertThat(sounds.played.last()).isEqualTo(Sound.GAME_OVER)
     }
@@ -139,6 +144,20 @@ class LevelGameViewModelTest {
 
         assertThat(vm.uiState.value.game.hint).isNotNull()
         assertThat(vm.uiState.value.game.game!!.hintsRemaining).isEqualTo(0)
+    }
+
+    @Test
+    fun dailyChallengeIsGeneratedForItsDateWithoutUndo() {
+        val day = 20_745L
+        val vm = viewModel(DailyChallenge.idFor(day))
+
+        val state = vm.uiState.value
+        assertThat(state.isDaily).isTrue()
+        assertThat(state.level).isEqualTo(DailyChallenge.levelFor(day))
+        assertThat(state.nextLevelId).isNull()
+        assertThat(state.game.game!!.undosRemaining).isEqualTo(0)
+        assertThat(progression.dailyAttempts).containsExactly(day)
+        assertThat(progress.current).isEmpty()
     }
 
     @Test
