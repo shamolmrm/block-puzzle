@@ -12,5 +12,9 @@
         <!-- No advertising ID or ad personalization signals from Analytics. -->
         <meta-data android:name="google_analytics_adid_collection_enabled" android:value="false" />
         <meta-data android:name="google_analytics_default_allow_ad_personalization_signals" android:value="false" />
+        <!-- Consent Mode v2 defaults before FirebaseStartup applies the player's choices. -->
+        <meta-data android:name="google_analytics_default_allow_ad_storage" android:value="false" />
+        <meta-data android:name="google_analytics_default_allow_ad_user_data" android:value="false" />
+        <meta-data android:name="google_analytics_default_allow_analytics_storage" android:value="false" />
     </application>
 </manifest>

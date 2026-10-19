@@ -64,6 +64,13 @@ Each step below needs your explicit approval. ✅ marks work that's already done
 
 **Build and quality**
 - ✅ R8 release build; app icon (original adaptive and themed icon)
+- ✅ All phones and tablets:
+  - no required hardware features and no orientation lock;
+  - landscape and tablet layouts for Home and the game, with tests;
+  - 16 KB page-size compliant: zip alignment and ELF `LOAD` alignment 16384 verified on all 64-bit libs
+- ✅ GDPR: the UMP consent form was verified on a device (EEA debug), "Ad privacy choices" in Settings, Consent Mode v2 for Analytics
+- ⬜ `admob.properties` with the real AdMob app and unit ids (`bundleRelease` refuses to build without it)
+- ⬜ GDPR message created and published in AdMob → Privacy & messaging
 - ✅ Unit, on-device, rules and function tests pass; lint shows 0 errors
 - ✅ Accessibility checks (ATF) and adaptive-layout tests (small phone with 1.3× text, landscape, tablet)
 - ⬜ Generate and commit the Baseline Profile on an emulator or Pixel (deferred: the OPPO test phone blocks it); run the startup benchmark

@@ -1,6 +1,7 @@
 package com.puzzleblockblast.game.core.monetization.ads
 
 import android.app.Activity
+import com.puzzleblockblast.game.core.monetization.BuildConfig
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -33,12 +34,15 @@ interface AdsGateway {
 }
 
 /**
- * AdMob ad unit ids. These are Google's published TEST units: they serve test ads that earn
- * nothing, so they're safe to click while developing. Real units must never be used for test
- * traffic; swapping them in is a release step that needs explicit approval (docs/MONETIZATION.md).
+ * AdMob ad unit ids for this build. Debug builds always get Google's published TEST units (they
+ * serve test ads, earn nothing and are safe to click). Release builds get the real units from
+ * admob.properties when present (docs/MONETIZATION.md).
  */
 object AdUnits {
-    const val REWARDED = "ca-app-pub-3940256099942544/5224354917"
-    const val INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712"
+    val REWARDED: String = BuildConfig.ADMOB_REWARDED
+    val INTERSTITIAL: String = BuildConfig.ADMOB_INTERSTITIAL
     const val TEST_PUBLISHER = "ca-app-pub-3940256099942544"
+
+    /** True when this build serves Google's test ads (always in debug; in release until real ids are set). */
+    val isTestAds: Boolean get() = REWARDED.startsWith(TEST_PUBLISHER) && INTERSTITIAL.startsWith(TEST_PUBLISHER)
 }

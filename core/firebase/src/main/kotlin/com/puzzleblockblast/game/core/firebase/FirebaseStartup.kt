@@ -32,6 +32,17 @@ class FirebaseStartup @Inject constructor(
         scope.launch {
             settings.settings.collect { s ->
                 analytics.setAnalyticsCollectionEnabled(s.shareUsageData)
+                // Google Consent Mode v2: analytics is never used for ads, so ad signals are always
+                // denied; analytics storage follows the player's "Share usage statistics" choice.
+                analytics.setConsent(
+                    mapOf(
+                        FirebaseAnalytics.ConsentType.AD_STORAGE to FirebaseAnalytics.ConsentStatus.DENIED,
+                        FirebaseAnalytics.ConsentType.AD_USER_DATA to FirebaseAnalytics.ConsentStatus.DENIED,
+                        FirebaseAnalytics.ConsentType.AD_PERSONALIZATION to FirebaseAnalytics.ConsentStatus.DENIED,
+                        FirebaseAnalytics.ConsentType.ANALYTICS_STORAGE to
+                            if (s.shareUsageData) FirebaseAnalytics.ConsentStatus.GRANTED else FirebaseAnalytics.ConsentStatus.DENIED,
+                    ),
+                )
                 crashlytics.isCrashlyticsCollectionEnabled = s.shareCrashReports
             }
         }

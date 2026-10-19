@@ -9,6 +9,34 @@ Status: **implemented in Phase 7 with test ads only. Nothing is live.** Real ad 
 - **Paid entitlements come from the server:** they're never trusted from the client. "Remove ads" is granted only by the `verifyPurchase` Cloud Function. The app reads `users/{uid}/entitlements/main`, which clients can't write (rules-tested).
 - **Nothing real without approval:** no real purchases or production ad deployment until you approve them.
 
+## AdMob configuration (real ids)
+
+Ad ids are injected at build time from **git-ignored** files (`core/monetization/build.gradle.kts`):
+
+| File | Used by | Contents |
+|---|---|---|
+| *(none)* | **Debug** builds, always | Google's sample test ids. `AdMobGateway` refuses to start a debug build with real ids. |
+| `admob.properties` | **Release** builds | `appId=ca-app-pub-XXXX~YYYY`, `rewardedUnitId=ca-app-pub-XXXX/…`, `interstitialUnitId=ca-app-pub-XXXX/…` |
+| `ads-debug.properties` | Debug only | `testDeviceIds=<hashed id from logcat>`, `umpDebugGeography=EEA` (for testing the GDPR form) |
+
+- **Play bundle gate:** `gradlew :app:bundleRelease` **fails** when `admob.properties` is missing, so a bundle with test ads can't be uploaded by accident. Local release and benchmark APKs still build.
+- **Ad content:** all requests use `MAX_AD_CONTENT_RATING_PG` (a general-audience puzzle game) and `TAG_FOR_UNDER_AGE_OF_CONSENT_FALSE`. Revisit both if the target audience changes.
+
+## GDPR / privacy messaging (you, in the AdMob console)
+
+1. **GDPR message:** under Privacy & messaging, create a European regulations (GDPR) message for this app and publish it, with your privacy policy URL. Optionally add a US states message too.
+2. **Ad partners:** choose the ad technology providers to list (Google defaults are fine to start).
+3. **The app needs no code change.** UMP shows whichever message you publish.
+
+**Verified on the OPPO test phone (debug, EEA debug geography):**
+- The consent form appeared on first launch (`IABTCF_gdprApplies=1`), with Consent / Do not consent / Manage options.
+- After "Do not consent", the app kept working with limited ads (test device) and Settings showed **Ad privacy choices**.
+
+**Consent Mode v2 (Firebase Analytics):**
+- `ad_storage`, `ad_user_data` and `ad_personalization` are always **denied**, because Analytics is never used for ads.
+- `analytics_storage` follows "Share usage statistics".
+- The manifest defaults are all denied until the player's settings load.
+
 ## Consent (UMP)
 
 - **Before anything loads:** `MainActivity` runs Google's consent flow before any ad request, and the form shows only where it's required (e.g. EEA/UK).

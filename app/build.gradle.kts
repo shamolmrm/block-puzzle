@@ -56,6 +56,17 @@ android {
     }
 }
 
+// The Play upload bundle must carry real AdMob ids; otherwise players would only ever see test
+// ads (and the app would earn nothing). Local release/benchmark APKs are unaffected.
+val admobConfigured = rootProject.file("admob.properties").exists()
+tasks.matching { it.name == "bundleRelease" }.configureEach {
+    doFirst {
+        check(admobConfigured) {
+            "admob.properties is missing: add your real AdMob app id and ad unit ids before building the Play bundle (docs/MONETIZATION.md)."
+        }
+    }
+}
+
 baselineProfile {
     // Profiles are generated on a device (docs/RELEASE.md) and committed under src/main/generated.
     automaticGenerationDuringBuild = false

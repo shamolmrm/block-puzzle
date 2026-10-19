@@ -18,6 +18,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -63,34 +64,25 @@ fun HomeScreen(
     profile: HomeProfile? = null,
 ) {
     val comingSoon = stringResource(R.string.home_coming_soon)
-    PbbBackground(modifier = modifier) {
+    val branding: @Composable () -> Unit = {
+        BlockLogo()
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.home_title),
+            style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Black),
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.semantics { heading() },
+        )
+        Text(
+            text = stringResource(R.string.home_subtitle),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f),
+            textAlign = TextAlign.Center,
+        )
+    }
+    val menu: @Composable () -> Unit = {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .safeDrawingPadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
-        ) {
-            if (profile != null) ProfileBadge(profile, onOpenStats)
-            BlockLogo()
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = stringResource(R.string.home_title),
-                style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Black),
-                color = MaterialTheme.colorScheme.onBackground,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.semantics { heading() },
-            )
-            Text(
-                text = stringResource(R.string.home_subtitle),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f),
-                textAlign = TextAlign.Center,
-            )
-            Spacer(Modifier.height(24.dp))
-            Column(
                 modifier = Modifier.widthIn(max = 420.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
@@ -122,6 +114,46 @@ fun HomeScreen(
                     TextButton(onClick = onOpenSettings) {
                         Text(stringResource(R.string.home_settings), style = MaterialTheme.typography.titleMedium)
                     }
+                }
+            }
+    }
+
+    PbbBackground(modifier = modifier) {
+        BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding()) {
+            // Landscape phones and tablets: branding on the left, menu on the right, so the main
+            // buttons are never below the fold.
+            if (maxWidth > maxHeight * 1.15f) {
+                Row(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterHorizontally),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        if (profile != null) ProfileBadge(profile, onOpenStats)
+                        branding()
+                    }
+                    Column(
+                        modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) { menu() }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp, vertical = 32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+                ) {
+                    if (profile != null) ProfileBadge(profile, onOpenStats)
+                    branding()
+                    Spacer(Modifier.height(24.dp))
+                    menu()
                 }
             }
         }

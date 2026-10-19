@@ -30,3 +30,7 @@ firebase/node_modules/
 firebase/functions/node_modules/
 *-debug.log
 firebase/.firebase/
+
+# Ad configuration (real ids, test device ids): never committed
+admob.properties
+ads-debug.properties

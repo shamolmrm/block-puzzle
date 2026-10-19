@@ -7,6 +7,9 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.RequestConfiguration
+import com.google.android.ump.ConsentDebugSettings
+import com.puzzleblockblast.game.core.monetization.BuildConfig
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
@@ -39,9 +42,8 @@ class AdMobGateway @Inject constructor(
 ) : AdsGateway {
 
     init {
-        require(AdUnits.REWARDED.startsWith(AdUnits.TEST_PUBLISHER) && AdUnits.INTERSTITIAL.startsWith(AdUnits.TEST_PUBLISHER)) {
-            "Only test ad units are allowed until release approval"
-        }
+        // Test traffic must never hit real ads: a debug build with real ids is a configuration error.
+        check(!BuildConfig.DEBUG || AdUnits.isTestAds) { "Debug builds must use Google's test ad units" }
     }
 
     private val consent: ConsentInformation = UserMessagingPlatform.getConsentInformation(context)
@@ -60,9 +62,24 @@ class AdMobGateway @Inject constructor(
     private var interstitial: InterstitialAd? = null
 
     override fun gatherConsent(activity: Activity) {
+        val params = ConsentRequestParameters.Builder()
+            .setTagForUnderAgeOfConsent(false)
+            .apply {
+                // Debug only: pretend to be in the EEA so the GDPR form can be tested on any phone.
+                val testDevice = BuildConfig.ADS_TEST_DEVICE_IDS.split(',').map { it.trim() }.firstOrNull { it.isNotEmpty() }
+                if (BuildConfig.DEBUG && BuildConfig.UMP_DEBUG_EEA && testDevice != null) {
+                    setConsentDebugSettings(
+                        ConsentDebugSettings.Builder(activity)
+                            .setDebugGeography(ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_EEA)
+                            .addTestDeviceHashedId(testDevice)
+                            .build(),
+                    )
+                }
+            }
+            .build()
         consent.requestConsentInfoUpdate(
             activity,
-            ConsentRequestParameters.Builder().build(),
+            params,
             {
                 UserMessagingPlatform.loadAndShowConsentFormIfRequired(activity) { onConsentResolved() }
             },
@@ -84,6 +101,14 @@ class AdMobGateway @Inject constructor(
             // Initializing on the main thread blocked it for seconds on a real phone (ANR risk):
             // Google recommends a background thread. Ads load on the main thread once it's done.
             scope.launch(Dispatchers.IO) {
+                MobileAds.setRequestConfiguration(
+                    RequestConfiguration.Builder()
+                        // A puzzle game for a general audience: no mature ad content.
+                        .setMaxAdContentRating(RequestConfiguration.MAX_AD_CONTENT_RATING_PG)
+                        .setTagForUnderAgeOfConsent(RequestConfiguration.TAG_FOR_UNDER_AGE_OF_CONSENT_FALSE)
+                        .setTestDeviceIds(BuildConfig.ADS_TEST_DEVICE_IDS.split(',').map { it.trim() }.filter { it.isNotEmpty() })
+                        .build(),
+                )
                 MobileAds.initialize(context) {
                     scope.launch(Dispatchers.Main) {
                         _canRequestAds.value = true
