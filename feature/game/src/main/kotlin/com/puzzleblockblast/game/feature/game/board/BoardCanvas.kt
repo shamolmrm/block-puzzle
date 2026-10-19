@@ -24,8 +24,8 @@ import com.puzzleblockblast.game.core.engine.board.Board
 import com.puzzleblockblast.game.core.engine.board.GridPoint
 import com.puzzleblockblast.game.feature.game.R
 
-/** Cells removed by the last move, animated as a burst while [progress] runs from 0 to 1. */
-data class ClearBurst(val cells: List<GridPoint>, val color: Color, val progress: Float)
+/** Cells removed by the last move, animated as a burst (progress supplied separately, 0 to 1). */
+data class ClearBurst(val cells: List<GridPoint>, val color: Color)
 
 /**
  * Draws the board in a single Canvas pass: tiles, the drop preview (ghost piece plus the lines it
@@ -39,6 +39,8 @@ fun BoardCanvas(
     preview: PlacementPreview? = null,
     hintCells: List<GridPoint> = emptyList(),
     burst: ClearBurst? = null,
+    /** Read in the draw phase, so animating the burst only redraws the board. */
+    burstProgress: () -> Float = { 0f },
     onGeometry: (BoardGeometry) -> Unit = {},
 ) {
     val colors = PbbTheme.boardColors
@@ -83,7 +85,7 @@ fun BoardCanvas(
             }
         }
         hintCells.forEach { drawHintOutline(it, cell, colors) }
-        if (burst != null) drawBurst(burst, cell)
+        if (burst != null) drawBurst(burst, burstProgress(), cell)
     }
 }
 
@@ -122,8 +124,7 @@ private fun DrawScope.drawEmptyCell(row: Int, col: Int, cell: Float, color: Colo
 }
 
 /** Cleared blocks flash white, then shrink and fade away. */
-private fun DrawScope.drawBurst(burst: ClearBurst, cell: Float) {
-    val t = burst.progress
+private fun DrawScope.drawBurst(burst: ClearBurst, t: Float, cell: Float) {
     val scale = 1f - t
     val flash = Color.White.copy(alpha = (1f - t) * 0.9f)
     burst.cells.forEach { p ->

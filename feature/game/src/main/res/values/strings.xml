@@ -9,8 +9,14 @@
         <item quantity="other">Puzzle board, %1$d by %2$d cells, %3$d cells filled</item>
     </plurals>
     <string name="game_slot_empty">Slot %1$d, empty</string>
-    <string name="game_slot_piece">Slot %1$d, piece with %2$d blocks. Drag onto the board.</string>
-    <string name="game_slot_piece_no_fit">Slot %1$d, piece with %2$d blocks, no space on the board</string>
+    <plurals name="game_slot_piece">
+        <item quantity="one">Slot %1$d, piece with %2$d block. Drag onto the board.</item>
+        <item quantity="other">Slot %1$d, piece with %2$d blocks. Drag onto the board.</item>
+    </plurals>
+    <plurals name="game_slot_piece_no_fit">
+        <item quantity="one">Slot %1$d, piece with %2$d block, no space on the board</item>
+        <item quantity="other">Slot %1$d, piece with %2$d blocks, no space on the board</item>
+    </plurals>
     <string name="game_undo">Undo (%1$d)</string>
     <string name="game_hint">Hint (%1$d)</string>
     <string name="game_undo_ad">▶ Undo (ad)</string>

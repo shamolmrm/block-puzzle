@@ -3,7 +3,11 @@
 An original casual block-puzzle game for Android: Kotlin, Jetpack Compose, ViewModel + StateFlow, Hilt and DataStore.
 It is built to play offline first. Firebase and ads are added in later phases, behind interfaces.
 
-> **Status: Phase 7 (ads + "Remove ads", test mode only).** AdMob with Google's sample test units behind
+> **Status: Phase 8 (release preparation): release-ready in test mode, nothing published.** R8 release
+> build (5.6 MB), original adaptive icon, signing via an uncommitted `keystore.properties`, refund
+> revocation, landscape/tablet layout, accessibility and layout tests, store drafts and a pre-release
+> checklist (see [`docs/RELEASE.md`](docs/RELEASE.md)).
+> Phase 7 (ads + "Remove ads", test mode only): AdMob with Google's sample test units behind
 > UMP consent, paced interstitials at breaks, opt-in rewarded undo/hint granted only on the SDK's reward
 > callback, and a one-time "Remove ads" purchase granted only by server-side verification
 > (see [`docs/MONETIZATION.md`](docs/MONETIZATION.md)). Nothing real is live without approval.

@@ -26,6 +26,7 @@ dependencyResolutionManagement {
 rootProject.name = "PuzzleBlockBlast"
 
 include(":app")
+include(":baselineprofile")
 
 include(":core:engine")
 include(":core:model")

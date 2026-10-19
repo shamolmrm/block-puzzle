@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -101,8 +102,8 @@ private fun TraySlot(
     val currentOnDragCancel by rememberUpdatedState(onDragCancel)
     val description = when {
         piece == null -> stringResource(R.string.game_slot_empty, slot + 1)
-        fits -> stringResource(R.string.game_slot_piece, slot + 1, piece.shape.size)
-        else -> stringResource(R.string.game_slot_piece_no_fit, slot + 1, piece.shape.size)
+        fits -> pluralStringResource(R.plurals.game_slot_piece, piece.shape.size, slot + 1, piece.shape.size)
+        else -> pluralStringResource(R.plurals.game_slot_piece_no_fit, piece.shape.size, slot + 1, piece.shape.size)
     }
 
     Box(

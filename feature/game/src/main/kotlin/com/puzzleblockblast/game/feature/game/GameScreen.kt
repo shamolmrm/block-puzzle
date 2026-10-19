@@ -30,6 +30,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -148,15 +150,18 @@ fun GameScreen(
 
         val dragPiece = dragSlot?.let { game.tray.getOrNull(it) }
         val boardGeometry = geometry
-        val dragTopLeft = if (dragPiece != null && boardGeometry != null) {
-            DragGeometry.pieceTopLeft(pointer, dragPiece.shape, boardGeometry.cellSize, liftPx)
-        } else {
-            null
-        }
-        val preview = if (dragPiece != null && boardGeometry != null && dragTopLeft != null) {
-            DragGeometry.preview(game.board, dragSlot!!, dragPiece, DragGeometry.snapOrigin(dragTopLeft, boardGeometry))
-        } else {
-            null
+        // Performance: the pointer moves on every drag event, so it's only read (a) here, through
+        // derivedStateOf, which notifies only when the snapped preview actually changes, and (b) in
+        // the floating piece's draw phase. Reading it directly would recompose the whole screen per event.
+        val currentGame by rememberUpdatedState(game)
+        val preview by remember {
+            derivedStateOf {
+                val slot = dragSlot ?: return@derivedStateOf null
+                val piece = currentGame.tray.getOrNull(slot) ?: return@derivedStateOf null
+                val g = geometry ?: return@derivedStateOf null
+                val topLeft = DragGeometry.pieceTopLeft(pointer, piece.shape, g.cellSize, liftPx)
+                DragGeometry.preview(currentGame.board, slot, piece, DragGeometry.snapOrigin(topLeft, g))
+            }
         }
         val hintCells = state.hint?.let { hint -> game.tray.getOrNull(hint.slot)?.shape?.cellsAt(hint.origin) }.orEmpty()
 
@@ -178,9 +183,12 @@ fun GameScreen(
                 feedback.animateTo(1f, tween(FEEDBACK_MS, easing = FastOutSlowInEasing))
             }
         }
+        // Only start/stop is read in composition; per-frame progress is read in the draw phase.
+        val animating = feedback.isRunning
         val burst = outcome
-            ?.takeIf { !it.clearedLines.isEmpty && feedback.value < 1f }
-            ?.let { ClearBurst(it.clearedLines.cells(game.board).toList(), dropColor, feedback.value) }
+            ?.takeIf { !it.clearedLines.isEmpty && animating }
+            ?.let { ClearBurst(it.clearedLines.cells(game.board).toList(), dropColor) }
+        val feedbackProgress = { feedback.value }
 
         val snackbar = remember { SnackbarHostState() }
         val messageText = when (state.message) {
@@ -199,14 +207,16 @@ fun GameScreen(
         BoxWithConstraints(
             modifier = Modifier.fillMaxSize().onGloballyPositioned { rootOrigin = it.positionInRoot() },
         ) {
+            // Landscape phones and tablets: board on the left, everything else in a column beside it.
+            val landscape = maxWidth > maxHeight * 1.15f
             // Board is as large as fits beside the HUD and tray, capped for tablets.
-            val boardSize: Dp = minOf(maxWidth - 24.dp, maxHeight - 330.dp, 480.dp).coerceAtLeast(220.dp)
+            val boardSize: Dp = if (landscape) {
+                minOf(maxHeight - 32.dp, maxWidth * 0.55f, 560.dp).coerceAtLeast(200.dp)
+            } else {
+                minOf(maxWidth - 24.dp, maxHeight - 330.dp, 480.dp).coerceAtLeast(220.dp)
+            }
 
-            Column(
-                modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = 12.dp, vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterVertically),
-            ) {
+            val headerContent: @Composable () -> Unit = {
                 if (header != null) {
                     header()
                 } else {
@@ -220,17 +230,22 @@ fun GameScreen(
                         modifier = Modifier.widthIn(max = 480.dp),
                     )
                 }
+            }
+            val boardContent: @Composable () -> Unit = {
                 Box(contentAlignment = Alignment.Center) {
                     BoardCanvas(
                         board = game.board,
                         preview = preview,
                         hintCells = hintCells,
                         burst = burst,
+                        burstProgress = feedbackProgress,
                         onGeometry = { geometry = it },
                         modifier = Modifier.width(boardSize),
                     )
-                    if (outcome != null && feedback.value < 1f) MovePopup(outcome, feedback.value)
+                    if (outcome != null && animating) MovePopup(outcome, feedbackProgress)
                 }
+            }
+            val trayContent: @Composable () -> Unit = {
                 PieceTray(
                     tray = game.tray,
                     slotsThatFit = state.slotsThatFit,
@@ -255,6 +270,8 @@ fun GameScreen(
                     onDragCancel = { dragSlot = null },
                     modifier = Modifier.widthIn(max = 480.dp),
                 )
+            }
+            val controlsContent: @Composable () -> Unit = {
                 if (showControls) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         // When the free ones are used up, the same button offers an optional rewarded ad.
@@ -280,10 +297,43 @@ fun GameScreen(
                 }
             }
 
+            val padding = Modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = 12.dp, vertical = 16.dp)
+            if (landscape) {
+                Row(
+                    modifier = padding,
+                    horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    boardContent()
+                    Column(
+                        modifier = Modifier.weight(1f, fill = false).widthIn(max = 480.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        headerContent()
+                        trayContent()
+                        controlsContent()
+                    }
+                }
+            } else {
+                Column(
+                    modifier = padding,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterVertically),
+                ) {
+                    headerContent()
+                    boardContent()
+                    trayContent()
+                    controlsContent()
+                }
+            }
+
             // The dragged piece floats above everything at board scale, with a soft drop shadow.
-            if (dragPiece != null && dragTopLeft != null && boardGeometry != null) {
+            if (dragPiece != null && boardGeometry != null) {
                 Canvas(Modifier.fillMaxSize()) {
-                    val origin = dragTopLeft - rootOrigin
+                    // Reading the pointer here (draw phase) means a move only redraws this layer.
+                    val topLeft = DragGeometry.pieceTopLeft(pointer, dragPiece.shape, boardGeometry.cellSize, liftPx)
+                    val origin = topLeft - rootOrigin
                     val shadow = boardGeometry.cellSize * 0.18f
                     translate(shadow, shadow) {
                         dragPiece.shape.cells.forEach { p ->
@@ -321,11 +371,13 @@ private const val FEEDBACK_MS = 650
 
 /** "+points" (plus combo / board-clear callouts) rising and fading over the board after a clear. */
 @Composable
-private fun MovePopup(outcome: MoveOutcome, progress: Float) {
+private fun MovePopup(outcome: MoveOutcome, progressProvider: () -> Float) {
     val rise = with(LocalDensity.current) { 56.dp.toPx() }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
+        // Progress is read inside graphicsLayer (draw phase): animating doesn't recompose the text.
         modifier = Modifier.graphicsLayer {
+            val progress = progressProvider()
             translationY = -rise * progress
             alpha = (1f - progress * progress)
             val pop = 0.8f + 0.4f * minOf(progress * 4f, 1f)

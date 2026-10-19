@@ -18,8 +18,11 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Purchase token claims: server only.
+    // Purchase token claims and server bookkeeping: server only.
     match /purchaseTokens/{token} {
+      allow read, write: if false;
+    }
+    match /system/{docId} {
       allow read, write: if false;
     }
 
