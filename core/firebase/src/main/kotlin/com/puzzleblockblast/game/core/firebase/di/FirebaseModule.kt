@@ -5,6 +5,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.puzzleblockblast.game.core.analytics.AnalyticsTracker
 import com.puzzleblockblast.game.core.analytics.CrashReporter
@@ -19,6 +20,12 @@ import com.puzzleblockblast.game.core.firebase.FirebaseConfigRepository
 import com.puzzleblockblast.game.core.firebase.FirebaseCrashReporter
 import com.puzzleblockblast.game.core.firebase.FirebaseStatus
 import com.puzzleblockblast.game.core.firebase.FirestoreCloudStore
+import com.puzzleblockblast.game.core.firebase.CallablePurchaseVerifier
+import com.puzzleblockblast.game.core.firebase.FirestoreEntitlementSource
+import com.puzzleblockblast.game.core.monetization.billing.EntitlementSource
+import com.puzzleblockblast.game.core.monetization.billing.NoEntitlementSource
+import com.puzzleblockblast.game.core.monetization.billing.NoPurchaseVerifier
+import com.puzzleblockblast.game.core.monetization.billing.PurchaseVerifier
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -54,4 +61,18 @@ internal object FirebaseModule {
     @Singleton
     fun config(@ApplicationContext context: Context, offline: DefaultConfigRepository): ConfigRepository =
         if (FirebaseStatus.isConfigured(context)) FirebaseConfigRepository(FirebaseRemoteConfig.getInstance()) else offline
+
+    @Provides
+    @Singleton
+    fun purchaseVerifier(@ApplicationContext context: Context, cloud: CloudStore): PurchaseVerifier =
+        if (FirebaseStatus.isConfigured(context)) CallablePurchaseVerifier(FirebaseFunctions.getInstance(), cloud) else NoPurchaseVerifier
+
+    @Provides
+    @Singleton
+    fun entitlementSource(@ApplicationContext context: Context): EntitlementSource =
+        if (FirebaseStatus.isConfigured(context)) {
+            FirestoreEntitlementSource(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
+        } else {
+            NoEntitlementSource
+        }
 }

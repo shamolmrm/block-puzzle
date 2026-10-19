@@ -77,6 +77,19 @@ test('malformed or forged documents are rejected', async () => {
   await assertFails(setDoc(ref, missingCounters));
 });
 
+test('players can read but never write their paid entitlements', async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), 'users/alice/entitlements/main'), { removeAds: true });
+  });
+  const alice = mine('alice');
+  await assertSucceeds(getDoc(doc(alice, 'users/alice/entitlements/main')));
+  await assertFails(setDoc(doc(alice, 'users/alice/entitlements/main'), { removeAds: true }));
+  await assertFails(setDoc(doc(mine('mallory'), 'users/mallory/entitlements/main'), { removeAds: true }));
+  await assertFails(getDoc(doc(mine('mallory'), 'users/alice/entitlements/main')));
+  await assertFails(getDoc(doc(alice, 'purchaseTokens/some-token')));
+  await assertFails(setDoc(doc(alice, 'purchaseTokens/some-token'), { uid: 'alice' }));
+});
+
 test('oversized maps are rejected', async () => {
   const ref = doc(mine('alice'), 'users/alice/progress/main');
   const devices = Object.fromEntries(Array.from({ length: 21 }, (_, i) => [`device-${i}`, { xp: 1 }]));

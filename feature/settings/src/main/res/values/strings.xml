@@ -16,4 +16,14 @@
     <string name="settings_backup_syncing">Backing up…</string>
     <string name="settings_backup_failed">Couldn\'t back up right now. Your progress is safe on this device; it will retry automatically.</string>
     <string name="settings_backup_now">Back up now</string>
+    <string name="settings_ad_privacy">Ad privacy choices</string>
+    <string name="settings_store">Remove ads</string>
+    <string name="settings_remove_ads_detail">A one-time purchase that turns off the ads shown between games. Optional ads you choose to watch for an extra undo or hint stay available.</string>
+    <string name="settings_remove_ads_buy">Remove ads · %1$s</string>
+    <string name="settings_ads_removed">Ads removed. Thank you for supporting the game! ✓</string>
+    <string name="settings_store_unavailable">The store isn\'t available right now.</string>
+    <string name="settings_purchase_verifying">Confirming your purchase…</string>
+    <string name="settings_purchase_pending">Your payment is pending. Ads will be removed once it completes.</string>
+    <string name="settings_purchase_failed">Purchase not completed: %1$s</string>
+    <string name="settings_restore_purchases">Restore purchases</string>
 </resources>

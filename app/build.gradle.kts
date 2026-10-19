@@ -40,6 +40,7 @@ dependencies {
     implementation(project(":core:analytics"))
     implementation(project(":core:audio"))
     implementation(project(":core:firebase"))
+    implementation(project(":core:monetization"))
     implementation(project(":feature:home"))
     implementation(project(":feature:game"))
     implementation(project(":feature:levels"))

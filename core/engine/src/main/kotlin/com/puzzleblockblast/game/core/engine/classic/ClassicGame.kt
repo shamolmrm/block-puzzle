@@ -112,6 +112,19 @@ class ClassicGame(
         )
     }
 
+    /**
+     * Adds one undo (e.g. after a verified rewarded ad). Null if the game is over or already at the cap.
+     * The caller is responsible for only calling this once the reward was actually earned.
+     */
+    fun grantUndo(state: GameState): GameState? =
+        if (state.isGameOver || state.undosRemaining >= ClassicRules.MAX_UNDOS_PER_GAME) null
+        else state.copy(undosRemaining = state.undosRemaining + 1)
+
+    /** Adds one hint, up to [ClassicRules.MAX_HINTS_PER_GAME]. Null if over or capped. */
+    fun grantHint(state: GameState): GameState? =
+        if (state.isGameOver || state.hintsRemaining >= ClassicRules.MAX_HINTS_PER_GAME) null
+        else state.copy(hintsRemaining = state.hintsRemaining + 1)
+
     /** Uses one hint and returns the best legal move. Never consumes a hint when there is no legal move. */
     fun requestHint(state: GameState): HintResult {
         val move = bestMove(state) ?: return HintResult.NoValidMove
@@ -209,7 +222,7 @@ class ClassicGame(
                 s.score >= 0 && s.combo >= 0 && s.moves >= 0 && s.linesCleared >= 0 &&
                 // Hints use the global cap, not this run's value: a remote-config change between app
                 // starts must not invalidate a saved game.
-                s.undosRemaining in 0..rules.undosPerGame && s.hintsRemaining in 0..ClassicRules.MAX_HINTS_PER_GAME &&
+                s.undosRemaining in 0..ClassicRules.MAX_UNDOS_PER_GAME && s.hintsRemaining in 0..ClassicRules.MAX_HINTS_PER_GAME &&
                 Placement.findFullLines(s.board).isEmpty &&
                 (if (isSnapshot) s.previous == null else true)
         val previous = state.previous

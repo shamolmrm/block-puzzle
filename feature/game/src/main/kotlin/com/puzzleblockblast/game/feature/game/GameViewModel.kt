@@ -1,5 +1,6 @@
 package com.puzzleblockblast.game.feature.game
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.puzzleblockblast.game.core.analytics.AnalyticsEvent
@@ -22,6 +23,7 @@ import com.puzzleblockblast.game.core.engine.classic.MoveOutcome
 import com.puzzleblockblast.game.core.engine.classic.MoveResult
 import com.puzzleblockblast.game.core.model.GameMode
 import com.puzzleblockblast.game.core.model.UserSettings
+import com.puzzleblockblast.game.core.monetization.AdsController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -62,11 +64,23 @@ data class GameUiState(
     val isEnded: Boolean = false,
     /** XP and achievements earned by the finished game, once recorded. */
     val reward: Reward? = null,
+    /** A rewarded ad is loaded and consent allows it. */
+    val rewardedReady: Boolean = false,
+    /** Rewarded undos / hints still available in this game (per-game caps). */
+    val adUndosLeft: Int = 0,
+    val adHintsLeft: Int = 0,
 ) {
     val isPlaying: Boolean get() = game != null && !game.isGameOver && !isPaused && !isEnded
     val canUndo: Boolean get() = isPlaying && game?.canUndo == true
     val canHint: Boolean get() = isPlaying && (game?.hintsRemaining ?: 0) > 0
     val displayBest: Int get() = maxOf(bestScore, game?.score ?: 0)
+
+    /** Out of free undos, there's a move to undo, and the player may watch an ad for one more. */
+    val rewardedUndoOffer: Boolean
+        get() = isPlaying && rewardedReady && adUndosLeft > 0 && game?.undosRemaining == 0 && game.previous != null
+
+    val rewardedHintOffer: Boolean
+        get() = isPlaying && rewardedReady && adHintsLeft > 0 && game?.hintsRemaining == 0
 }
 
 @HiltViewModel
@@ -80,9 +94,12 @@ class GameViewModel @Inject constructor(
     private val sounds: SoundEffects,
     private val progression: ProgressionRepository,
     private val clock: WallClock,
+    private val ads: AdsController,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(GameUiState())
+    private val _uiState = MutableStateFlow(
+        GameUiState(adUndosLeft = ads.policy.rewardedUndosPerGame, adHintsLeft = ads.policy.rewardedHintsPerGame),
+    )
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
 
     /** Best score when the current game started; decides "new best" at game over. */
@@ -118,6 +135,9 @@ class GameViewModel @Inject constructor(
         }
         viewModelScope.launch {
             settingsRepository.settings.collect { s -> _uiState.update { it.copy(settings = s) } }
+        }
+        viewModelScope.launch {
+            ads.rewardedAvailable.collect { ready -> _uiState.update { it.copy(rewardedReady = ready) } }
         }
         viewModelScope.launch {
             val best = repository.bestScore.first()
@@ -201,10 +221,59 @@ class GameViewModel @Inject constructor(
         bestCombo = 0
         bestAtStart = current.displayBest
         _uiState.update {
-            GameUiState(isLoading = false, bestScore = current.displayBest, settings = it.settings)
-                .withGame(classic.newGame(seeds.nextSeed()))
+            GameUiState(
+                isLoading = false,
+                bestScore = current.displayBest,
+                settings = it.settings,
+                rewardedReady = it.rewardedReady,
+                adUndosLeft = ads.policy.rewardedUndosPerGame,
+                adHintsLeft = ads.policy.rewardedHintsPerGame,
+            ).withGame(classic.newGame(seeds.nextSeed()))
         }
         logGameStarted(resumed = false)
+    }
+
+    /**
+     * Shows a rewarded ad and grants one undo, but only once the ad SDK confirms the reward was earned
+     * (closing the ad early grants nothing). [activity] is only used while the ad is on screen.
+     */
+    fun onWatchAdForUndo(activity: Activity) = watchAd(activity, "undo", { it.rewardedUndoOffer }) { state ->
+        classic.grantUndo(state)?.also { _uiState.update { ui -> ui.copy(adUndosLeft = ui.adUndosLeft - 1) } }
+    }
+
+    fun onWatchAdForHint(activity: Activity) = watchAd(activity, "hint", { it.rewardedHintOffer }) { state ->
+        classic.grantHint(state)?.also { _uiState.update { ui -> ui.copy(adHintsLeft = ui.adHintsLeft - 1) } }
+    }
+
+    private fun watchAd(
+        activity: Activity,
+        source: String,
+        offered: (GameUiState) -> Boolean,
+        grant: (GameState) -> GameState?,
+    ) {
+        if (!offered(_uiState.value) || adInProgress) return
+        adInProgress = true
+        viewModelScope.launch {
+            try {
+                if (!ads.watchRewarded(activity, source)) return@launch
+                val state = _uiState.value.game ?: return@launch
+                val granted = grant(state) ?: return@launch
+                _uiState.update { it.copy(game = granted) }
+                writes.trySend(Write.Save(granted))
+            } finally {
+                adInProgress = false
+            }
+        }
+    }
+
+    private var adInProgress = false
+
+    /** A natural break (leaving a finished game): an interstitial may show, then [then] runs. */
+    fun onBreak(activity: Activity, then: () -> Unit) {
+        viewModelScope.launch {
+            ads.atBreak(activity)
+            then()
+        }
     }
 
     fun onMessageShown() {

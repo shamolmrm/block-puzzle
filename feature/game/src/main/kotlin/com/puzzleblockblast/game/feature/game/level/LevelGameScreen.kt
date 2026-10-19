@@ -1,5 +1,6 @@
 package com.puzzleblockblast.game.feature.game.level
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -59,6 +60,7 @@ fun LevelGameRoute(
     viewModel: LevelGameViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val activity = LocalActivity.current
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.onPause() }
     LevelGameScreen(
         state = state,
@@ -71,6 +73,9 @@ fun LevelGameRoute(
         onMessageShown = viewModel::onMessageShown,
         onLevels = onLevels,
         onNextLevel = onNextLevel,
+        onWatchAdForHint = { activity?.let(viewModel::onWatchAdForHint) },
+        // Leaving a finished level is a natural break: an interstitial may show (paced, consented).
+        throughBreak = { action -> if (activity != null) viewModel.onBreak(activity, action) else action() },
     )
 }
 
@@ -87,6 +92,9 @@ fun LevelGameScreen(
     onLevels: () -> Unit,
     onNextLevel: (levelId: String) -> Unit,
     modifier: Modifier = Modifier,
+    onWatchAdForHint: () -> Unit = {},
+    /** Runs a result-card action, possibly after an interstitial. */
+    throughBreak: (() -> Unit) -> Unit = { it() },
 ) {
     if (state.notFound) {
         LevelUnavailable(onLevels, modifier)
@@ -105,6 +113,7 @@ fun LevelGameScreen(
             onHome = onLevels,
             showGameOver = false,
             header = { LevelHeader(state, onPause) },
+            onWatchAdForHint = onWatchAdForHint,
         )
         when (state.result) {
             LevelResult.WON -> LevelCompleteOverlay(
@@ -114,14 +123,14 @@ fun LevelGameScreen(
                 nextLevelId = state.nextLevelId,
                 isDaily = state.isDaily,
                 reward = state.reward,
-                onNext = onNextLevel,
-                onReplay = onRestart,
-                onLevels = onLevels,
+                onNext = { id -> throughBreak { onNextLevel(id) } },
+                onReplay = { throughBreak(onRestart) },
+                onLevels = { throughBreak(onLevels) },
             )
             LevelResult.OUT_OF_MOVES, LevelResult.NO_MOVES -> LevelFailedOverlay(
                 outOfMoves = state.result == LevelResult.OUT_OF_MOVES,
-                onRetry = onRestart,
-                onLevels = onLevels,
+                onRetry = { throughBreak(onRestart) },
+                onLevels = { throughBreak(onLevels) },
             )
             LevelResult.IN_PROGRESS -> Unit
         }

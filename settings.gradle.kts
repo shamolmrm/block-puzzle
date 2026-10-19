@@ -34,6 +34,7 @@ include(":core:data")
 include(":core:analytics")
 include(":core:audio")
 include(":core:firebase")
+include(":core:monetization")
 include(":core:testing")
 
 include(":feature:home")

@@ -27,5 +27,6 @@ local.properties
 
 # Firebase tooling (rules tests, emulators)
 firebase/node_modules/
+firebase/functions/node_modules/
 *-debug.log
 firebase/.firebase/

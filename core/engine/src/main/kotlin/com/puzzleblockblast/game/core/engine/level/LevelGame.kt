@@ -81,6 +81,10 @@ class LevelGame(val level: LevelDefinition, catalog: ShapeCatalog = ShapeCatalog
         return classic.undo(state.game)?.let { LevelState(it, LevelResult.IN_PROGRESS) }
     }
 
+    /** Adds one hint (rewarded ad) to an attempt in progress. Null if finished or capped. */
+    fun grantHint(state: LevelState): LevelState? =
+        if (state.isFinished) null else classic.grantHint(state.game)?.let { state.copy(game = it) }
+
     fun requestHint(state: LevelState): HintResult =
         if (state.isFinished) HintResult.NoValidMove else classic.requestHint(state.game)
 

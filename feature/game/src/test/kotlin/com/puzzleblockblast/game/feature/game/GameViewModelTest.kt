@@ -1,5 +1,6 @@
 package com.puzzleblockblast.game.feature.game
 
+import android.app.Activity
 import com.google.common.truth.Truth.assertThat
 import com.puzzleblockblast.game.core.analytics.AnalyticsEvents
 import com.puzzleblockblast.game.core.engine.board.Board
@@ -15,6 +16,9 @@ import com.puzzleblockblast.game.core.audio.Sound
 import com.puzzleblockblast.game.core.model.UserSettings
 import com.puzzleblockblast.game.core.testing.FakeClassicGameRepository
 import com.puzzleblockblast.game.core.testing.FakeProgressionRepository
+import com.puzzleblockblast.game.core.testing.FakeAdsGateway
+import com.puzzleblockblast.game.core.testing.FakeEntitlements
+import com.puzzleblockblast.game.core.monetization.AdsController
 import com.puzzleblockblast.game.core.testing.FakeWallClock
 import com.puzzleblockblast.game.core.data.progress.Reward
 import com.puzzleblockblast.game.core.testing.FakeSettingsRepository
@@ -36,6 +40,8 @@ class GameViewModelTest {
     private val settings = FakeSettingsRepository()
     private val sounds = FakeSoundEffects()
     private val progression = FakeProgressionRepository()
+    private val adsGateway = FakeAdsGateway()
+    private val entitlements = FakeEntitlements()
     private var nextSeed = 100L
 
     private fun viewModel(repo: FakeClassicGameRepository = repository, seeds: SeedSource = SeedSource { nextSeed++ }) =
@@ -49,6 +55,7 @@ class GameViewModelTest {
             sounds = sounds,
             progression = progression,
             clock = FakeWallClock(),
+            ads = AdsController(adsGateway, entitlements, analytics, FakeWallClock(), CoroutineScope(mainDispatcher.dispatcher)),
         )
 
     private val GameViewModel.game: GameState get() = requireNotNull(uiState.value.game)
@@ -234,6 +241,77 @@ class GameViewModelTest {
 
         assertThat(progression.classicGames).hasSize(1)
         assertThat(vm.uiState.value.reward).isNull()
+    }
+
+    @Test
+    fun rewardedUndoIsOfferedOnlyWhenTheFreeUndoIsUsed() {
+        val vm = viewModel()
+        vm.playBestMove()
+        assertThat(vm.uiState.value.rewardedUndoOffer).isFalse() // free undo still available
+
+        vm.onUndo()
+        vm.playBestMove()
+
+        assertThat(vm.uiState.value.canUndo).isFalse()
+        assertThat(vm.uiState.value.rewardedUndoOffer).isTrue()
+    }
+
+    @Test
+    fun undoIsGrantedOnlyWhenTheAdRewardIsEarned() {
+        val vm = viewModel()
+        vm.playBestMove()
+        vm.onUndo()
+        vm.playBestMove()
+
+        adsGateway.nextRewardEarned = false // player closed the ad early
+        vm.onWatchAdForUndo(Activity())
+        assertThat(vm.game.undosRemaining).isEqualTo(0)
+
+        adsGateway.nextRewardEarned = true
+        vm.onWatchAdForUndo(Activity())
+        assertThat(vm.game.undosRemaining).isEqualTo(1)
+        assertThat(vm.uiState.value.canUndo).isTrue()
+        assertThat(repository.saved).isEqualTo(vm.game)
+    }
+
+    @Test
+    fun rewardedHintsAreCappedPerGameAndResetOnRestart() {
+        val vm = viewModel()
+        repeat(3) { vm.onHint() }
+
+        // Offered only while out of hints: watch, use the hint, repeat.
+        repeat(5) {
+            vm.onWatchAdForHint(Activity())
+            vm.onHint()
+        }
+
+        assertThat(adsGateway.rewardedShows).isEqualTo(2)
+        assertThat(vm.game.hintsRemaining).isEqualTo(0)
+        assertThat(vm.uiState.value.rewardedHintOffer).isFalse()
+
+        vm.onRestart()
+        assertThat(vm.uiState.value.adHintsLeft).isEqualTo(2)
+    }
+
+    @Test
+    fun noAdOffersWithoutConsentOrALoadedAd() {
+        adsGateway.canRequest.value = false
+        val vm = viewModel()
+        repeat(3) { vm.onHint() }
+
+        assertThat(vm.uiState.value.rewardedHintOffer).isFalse()
+        vm.onWatchAdForHint(Activity())
+        assertThat(adsGateway.rewardedShows).isEqualTo(0)
+    }
+
+    @Test
+    fun leavingAFinishedGameIsABreakThatRunsTheActionAfterwards() {
+        val vm = viewModel()
+        var continued = 0
+
+        vm.onBreak(Activity()) { continued++ }
+
+        assertThat(continued).isEqualTo(1)
     }
 
     @Test

@@ -12,6 +12,17 @@ service cloud.firestore {
       allow delete: if isOwner(uid) && docId == 'main';
     }
 
+    // Paid entitlements: written only by the verifyPurchase function (Admin SDK bypasses rules).
+    match /users/{uid}/entitlements/{docId} {
+      allow read: if isOwner(uid) && docId == 'main';
+      allow write: if false;
+    }
+
+    // Purchase token claims: server only.
+    match /purchaseTokens/{token} {
+      allow read, write: if false;
+    }
+
     // Everything else is closed.
     match /{document=**} {
       allow read, write: if false;

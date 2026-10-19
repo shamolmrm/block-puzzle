@@ -1,6 +1,12 @@
 package com.puzzleblockblast.game.feature.settings
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
+import com.puzzleblockblast.game.core.monetization.ads.AdsGateway
+import com.puzzleblockblast.game.core.monetization.billing.BillingGateway
+import com.puzzleblockblast.game.core.monetization.billing.Entitlements
+import com.puzzleblockblast.game.core.monetization.billing.PurchaseState
+import com.puzzleblockblast.game.core.monetization.billing.StoreOffer
 import androidx.lifecycle.viewModelScope
 import com.puzzleblockblast.game.core.analytics.AnalyticsTracker
 import com.puzzleblockblast.game.core.analytics.logSettingChanged
@@ -35,12 +41,43 @@ data class BackupUiState(
     val lastAttemptFailed: Boolean = false,
 )
 
+data class StoreUiState(
+    /** Null when the purchase can't be offered (not on the store yet, offline, no verification server). */
+    val offer: StoreOffer? = null,
+    /** Server-verified only. */
+    val adsRemoved: Boolean = false,
+    val purchase: PurchaseState = PurchaseState.Idle,
+    /** Consent rules (e.g. EU) require a way to change ad privacy choices. */
+    val privacyOptionsRequired: Boolean = false,
+)
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val repository: SettingsRepository,
     private val analytics: AnalyticsTracker,
     private val backup: CloudBackup,
+    private val billing: BillingGateway,
+    entitlements: Entitlements,
+    private val ads: AdsGateway,
 ) : ViewModel() {
+
+    val storeState: StateFlow<StoreUiState> = combine(
+        billing.removeAdsOffer,
+        entitlements.adsRemoved,
+        billing.purchaseState,
+        ads.privacyOptionsRequired,
+    ) { offer, removed, purchase, privacy -> StoreUiState(offer, removed, purchase, privacy) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StoreUiState())
+
+    fun buyRemoveAds(activity: Activity) {
+        val state = storeState.value
+        if (state.offer == null || state.adsRemoved) return
+        billing.launchRemoveAdsPurchase(activity)
+    }
+
+    fun restorePurchases() = billing.restorePurchases()
+
+    fun showAdPrivacyOptions(activity: Activity) = ads.showPrivacyOptions(activity)
 
     val settings: StateFlow<UserSettings> = repository.settings
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), UserSettings())

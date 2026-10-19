@@ -7,4 +7,5 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:data"))
     implementation(project(":core:audio"))
+    implementation(project(":core:monetization"))
 }

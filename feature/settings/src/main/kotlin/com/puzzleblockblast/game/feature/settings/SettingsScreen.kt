@@ -1,6 +1,8 @@
 package com.puzzleblockblast.game.feature.settings
 
 import android.text.format.DateUtils
+import androidx.activity.compose.LocalActivity
+import com.puzzleblockblast.game.core.monetization.billing.PurchaseState
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,11 +41,17 @@ fun SettingsRoute(
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val backup by viewModel.backupState.collectAsStateWithLifecycle()
+    val store by viewModel.storeState.collectAsStateWithLifecycle()
+    val activity = LocalActivity.current
     SettingsScreen(
         settings = settings,
         backup = backup,
+        store = store,
         onToggle = viewModel::setToggle,
         onBackUpNow = viewModel::backUpNow,
+        onBuyRemoveAds = { activity?.let(viewModel::buyRemoveAds) },
+        onRestorePurchases = viewModel::restorePurchases,
+        onAdPrivacyOptions = { activity?.let(viewModel::showAdPrivacyOptions) },
         onBack = onBack,
     )
 }
@@ -56,6 +64,10 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     backup: BackupUiState = BackupUiState(),
     onBackUpNow: () -> Unit = {},
+    store: StoreUiState = StoreUiState(),
+    onBuyRemoveAds: () -> Unit = {},
+    onRestorePurchases: () -> Unit = {},
+    onAdPrivacyOptions: () -> Unit = {},
 ) {
     PbbBackground(modifier = modifier) {
         Column(
@@ -84,6 +96,14 @@ fun SettingsScreen(
             ToggleRow(R.string.settings_share_crashes, settings.shareCrashReports, R.string.settings_share_crashes_detail) {
                 onToggle(SettingToggle.SHARE_CRASHES, it)
             }
+            if (store.privacyOptionsRequired) {
+                TextButton(onClick = onAdPrivacyOptions, modifier = Modifier.heightIn(min = 48.dp)) {
+                    Text(stringResource(R.string.settings_ad_privacy))
+                }
+            }
+
+            SectionTitle(R.string.settings_store)
+            StoreRow(store, onBuyRemoveAds, onRestorePurchases)
 
             SectionTitle(R.string.settings_backup)
             BackupRow(backup, onBackUpNow)
@@ -144,6 +164,38 @@ private fun BackupRow(backup: BackupUiState, onBackUpNow: () -> Unit) {
         if (backup.available) {
             FilledTonalButton(onClick = onBackUpNow, enabled = !backup.syncing, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.settings_backup_now))
+            }
+        }
+    }
+}
+
+@Composable
+private fun StoreRow(store: StoreUiState, onBuy: () -> Unit, onRestore: () -> Unit) {
+    Column(Modifier.padding(horizontal = 8.dp), verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)) {
+        val offer = store.offer
+        when {
+            store.adsRemoved -> Text(stringResource(R.string.settings_ads_removed), style = MaterialTheme.typography.bodyLarge)
+            offer != null -> {
+                Text(stringResource(R.string.settings_remove_ads_detail), style = MaterialTheme.typography.bodyMedium)
+                FilledTonalButton(
+                    onClick = onBuy,
+                    enabled = store.purchase !is PurchaseState.Verifying,
+                    modifier = Modifier.heightIn(min = 48.dp),
+                ) {
+                    Text(stringResource(R.string.settings_remove_ads_buy, offer.formattedPrice))
+                }
+            }
+            else -> Text(stringResource(R.string.settings_store_unavailable), style = MaterialTheme.typography.bodyMedium)
+        }
+        when (val purchase = store.purchase) {
+            PurchaseState.Verifying -> Text(stringResource(R.string.settings_purchase_verifying), style = MaterialTheme.typography.bodySmall)
+            PurchaseState.Pending -> Text(stringResource(R.string.settings_purchase_pending), style = MaterialTheme.typography.bodySmall)
+            is PurchaseState.Failed -> Text(stringResource(R.string.settings_purchase_failed, purchase.reason), style = MaterialTheme.typography.bodySmall)
+            PurchaseState.Idle, PurchaseState.Verified -> Unit
+        }
+        if (!store.adsRemoved) {
+            TextButton(onClick = onRestore, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(stringResource(R.string.settings_restore_purchases))
             }
         }
     }

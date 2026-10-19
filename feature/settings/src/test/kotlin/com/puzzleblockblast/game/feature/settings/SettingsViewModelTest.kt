@@ -5,6 +5,9 @@ import com.puzzleblockblast.game.core.analytics.AnalyticsEvents
 import com.puzzleblockblast.game.core.data.sync.SyncResult
 import com.puzzleblockblast.game.core.testing.FakeAnalyticsTracker
 import com.puzzleblockblast.game.core.testing.FakeCloudBackup
+import com.puzzleblockblast.game.core.testing.FakeAdsGateway
+import com.puzzleblockblast.game.core.testing.FakeBillingGateway
+import com.puzzleblockblast.game.core.testing.FakeEntitlements
 import com.puzzleblockblast.game.core.testing.FakeSettingsRepository
 import com.puzzleblockblast.game.core.testing.MainDispatcherRule
 import kotlinx.coroutines.launch
@@ -22,6 +25,9 @@ class SettingsViewModelTest {
     private val repository = FakeSettingsRepository()
     private val analytics = FakeAnalyticsTracker()
     private val backup = FakeCloudBackup()
+    private val billing = FakeBillingGateway()
+    private val entitlements = FakeEntitlements()
+    private val adsGateway = FakeAdsGateway()
 
     /** Keeps the WhileSubscribed state flows active, then lets all work finish before asserting. */
     private fun TestScope.subscribed(vm: SettingsViewModel): SettingsViewModel {
@@ -32,7 +38,7 @@ class SettingsViewModelTest {
 
     @Test
     fun toggleUpdatesStateAndLogsSettingsChanged() = runTest {
-        val vm = subscribed(SettingsViewModel(repository, analytics, backup))
+        val vm = subscribed(SettingsViewModel(repository, analytics, backup, billing, entitlements, adsGateway))
 
         vm.setToggle(SettingToggle.SOUND, false)
         advanceUntilIdle()
@@ -45,7 +51,7 @@ class SettingsViewModelTest {
 
     @Test
     fun optingOutOfDataSharingIsNotReported() = runTest {
-        val vm = subscribed(SettingsViewModel(repository, analytics, backup))
+        val vm = subscribed(SettingsViewModel(repository, analytics, backup, billing, entitlements, adsGateway))
 
         vm.setToggle(SettingToggle.SHARE_USAGE, false)
         vm.setToggle(SettingToggle.SHARE_CRASHES, false)
@@ -58,7 +64,7 @@ class SettingsViewModelTest {
 
     @Test
     fun backUpNowSyncsAndShowsTheTime() = runTest {
-        val vm = subscribed(SettingsViewModel(repository, analytics, backup))
+        val vm = subscribed(SettingsViewModel(repository, analytics, backup, billing, entitlements, adsGateway))
         assertThat(vm.backupState.value.lastSyncMillis).isNull()
 
         vm.backUpNow()
@@ -74,7 +80,7 @@ class SettingsViewModelTest {
     @Test
     fun failedBackupIsReported() = runTest {
         backup.result = SyncResult.Failed(RuntimeException("offline"))
-        val vm = subscribed(SettingsViewModel(repository, analytics, backup))
+        val vm = subscribed(SettingsViewModel(repository, analytics, backup, billing, entitlements, adsGateway))
 
         vm.backUpNow()
         advanceUntilIdle()
@@ -83,9 +89,38 @@ class SettingsViewModelTest {
     }
 
     @Test
+    fun removeAdsIsOfferedUntilTheServerConfirmsIt() = runTest {
+        val vm = SettingsViewModel(repository, analytics, backup, billing, entitlements, adsGateway)
+        backgroundScope.launch { vm.storeState.collect {} }
+        advanceUntilIdle()
+        assertThat(vm.storeState.value.offer?.formattedPrice).isEqualTo("$2.99")
+
+        vm.buyRemoveAds(android.app.Activity())
+        assertThat(billing.launches).isEqualTo(1)
+
+        entitlements.removed.value = true // the server verified the purchase
+        advanceUntilIdle()
+        assertThat(vm.storeState.value.adsRemoved).isTrue()
+        vm.buyRemoveAds(android.app.Activity())
+        assertThat(billing.launches).isEqualTo(1)
+    }
+
+    @Test
+    fun noPurchaseWhenTheStoreHasNoOffer() = runTest {
+        val noStore = FakeBillingGateway(offer = null)
+        val vm = SettingsViewModel(repository, analytics, backup, noStore, entitlements, adsGateway)
+        backgroundScope.launch { vm.storeState.collect {} }
+        advanceUntilIdle()
+
+        vm.buyRemoveAds(android.app.Activity())
+
+        assertThat(noStore.launches).isEqualTo(0)
+    }
+
+    @Test
     fun backupDoesNothingWhenUnavailable() = runTest {
         val unavailable = FakeCloudBackup(isAvailable = false)
-        val vm = subscribed(SettingsViewModel(repository, analytics, unavailable))
+        val vm = subscribed(SettingsViewModel(repository, analytics, unavailable, billing, entitlements, adsGateway))
 
         vm.backUpNow()
         advanceUntilIdle()

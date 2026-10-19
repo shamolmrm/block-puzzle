@@ -7,6 +7,7 @@ dependencies {
     api(project(":core:data"))
     api(project(":core:analytics"))
     api(project(":core:audio"))
+    api(project(":core:monetization"))
     api(libs.junit)
     api(libs.kotlinx.coroutines.test)
     api(libs.truth)

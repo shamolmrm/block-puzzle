@@ -1,5 +1,6 @@
 package com.puzzleblockblast.game.feature.game.level
 
+import android.app.Activity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,6 +28,7 @@ import com.puzzleblockblast.game.core.engine.level.LevelResult
 import com.puzzleblockblast.game.core.engine.level.LevelState
 import com.puzzleblockblast.game.core.engine.level.ObjectiveProgress
 import com.puzzleblockblast.game.core.model.GameMode
+import com.puzzleblockblast.game.core.monetization.AdsController
 import com.puzzleblockblast.game.feature.game.GameMessage
 import com.puzzleblockblast.game.feature.game.GameUiState
 import com.puzzleblockblast.game.feature.game.soundFor
@@ -73,6 +75,7 @@ class LevelGameViewModel @Inject constructor(
     private val clock: WallClock,
     settingsRepository: SettingsRepository,
     @param:ApplicationScope private val appScope: CoroutineScope,
+    private val ads: AdsController,
 ) : ViewModel() {
 
     private val levelId: String = requireNotNull(savedStateHandle[LEVEL_ID_KEY]) { "levelId missing" }
@@ -88,6 +91,9 @@ class LevelGameViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             settingsRepository.settings.collect { s -> _uiState.update { it.copy(game = it.game.copy(settings = s)) } }
+        }
+        viewModelScope.launch {
+            ads.rewardedAvailable.collect { ready -> _uiState.update { it.copy(game = it.game.copy(rewardedReady = ready)) } }
         }
         viewModelScope.launch {
             val (level, next) = if (dailyDay != null) {
@@ -168,10 +174,42 @@ class LevelGameViewModel @Inject constructor(
 
     fun onMessageShown() = setMessage(null)
 
+    /** Rewarded hint (pack levels only; the Daily stays identical for everyone). Granted only on a confirmed reward. */
+    fun onWatchAdForHint(activity: Activity) {
+        val game = engine ?: return
+        if (!_uiState.value.game.rewardedHintOffer || adInProgress) return
+        adInProgress = true
+        viewModelScope.launch {
+            try {
+                if (!ads.watchRewarded(activity, "level_hint")) return@launch
+                val granted = game.grantHint(current ?: return@launch) ?: return@launch
+                current = granted
+                _uiState.update { it.copy(game = it.game.copy(game = granted.game, adHintsLeft = it.game.adHintsLeft - 1)) }
+            } finally {
+                adInProgress = false
+            }
+        }
+    }
+
+    private var adInProgress = false
+
+    /** A natural break (leaving a finished level): an interstitial may show, then [then] runs. */
+    fun onBreak(activity: Activity, then: () -> Unit) {
+        viewModelScope.launch {
+            ads.atBreak(activity)
+            then()
+        }
+    }
+
     private fun startAttempt() {
         val game = engine ?: return
         bestCombo = 0
-        _uiState.update { it.copy(reward = null) }
+        _uiState.update {
+            it.copy(
+                reward = null,
+                game = it.game.copy(adHintsLeft = if (dailyDay != null) 0 else ads.policy.rewardedHintsPerGame, adUndosLeft = 0),
+            )
+        }
         publish(game.start(), outcome = null)
         appScope.launch {
             if (dailyDay != null) progression.recordDailyAttempt(dailyDay) else progress.recordAttempt(levelId)

@@ -13,6 +13,8 @@
     <string name="game_slot_piece_no_fit">Slot %1$d, piece with %2$d blocks, no space on the board</string>
     <string name="game_undo">Undo (%1$d)</string>
     <string name="game_hint">Hint (%1$d)</string>
+    <string name="game_undo_ad">▶ Undo (ad)</string>
+    <string name="game_hint_ad">▶ Hint (ad)</string>
     <string name="game_no_hints_left">No hints left for this game</string>
     <string name="game_no_valid_move">No piece fits on the board</string>
 

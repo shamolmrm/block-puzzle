@@ -1,5 +1,6 @@
 package com.puzzleblockblast.game.feature.game.level
 
+import android.app.Activity
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.puzzleblockblast.game.core.analytics.AnalyticsEvents
@@ -13,6 +14,9 @@ import com.puzzleblockblast.game.core.testing.FakeAnalyticsTracker
 import com.puzzleblockblast.game.core.testing.FakeLevelProgressRepository
 import com.puzzleblockblast.game.core.testing.FakeLevelRepository
 import com.puzzleblockblast.game.core.testing.FakeProgressionRepository
+import com.puzzleblockblast.game.core.testing.FakeAdsGateway
+import com.puzzleblockblast.game.core.testing.FakeEntitlements
+import com.puzzleblockblast.game.core.monetization.AdsController
 import com.puzzleblockblast.game.core.testing.FakeWallClock
 import com.puzzleblockblast.game.core.engine.level.DailyChallenge
 import com.puzzleblockblast.game.core.testing.FakeSettingsRepository
@@ -52,6 +56,7 @@ class LevelGameViewModelTest {
     private val analytics = FakeAnalyticsTracker()
     private val sounds = FakeSoundEffects()
     private val progression = FakeProgressionRepository()
+    private val adsGateway = FakeAdsGateway()
 
     private fun viewModel(id: String = "L0001") = LevelGameViewModel(
         savedStateHandle = SavedStateHandle(mapOf(LevelGameViewModel.LEVEL_ID_KEY to id)),
@@ -63,6 +68,7 @@ class LevelGameViewModelTest {
         clock = FakeWallClock(now = 42L),
         settingsRepository = FakeSettingsRepository(),
         appScope = CoroutineScope(mainDispatcher.dispatcher),
+        ads = AdsController(adsGateway, FakeEntitlements(), analytics, FakeWallClock(), CoroutineScope(mainDispatcher.dispatcher)),
     )
 
     @Test
@@ -158,6 +164,22 @@ class LevelGameViewModelTest {
         assertThat(state.game.game!!.undosRemaining).isEqualTo(0)
         assertThat(progression.dailyAttempts).containsExactly(day)
         assertThat(progress.current).isEmpty()
+    }
+
+    @Test
+    fun packLevelsOfferARewardedHintButTheDailyNeverDoes() {
+        val vm = viewModel()
+        vm.onHint() // uses the only free hint
+        assertThat(vm.uiState.value.game.rewardedHintOffer).isTrue()
+
+        vm.onWatchAdForHint(Activity())
+        assertThat(vm.uiState.value.game.game!!.hintsRemaining).isEqualTo(1)
+
+        val daily = viewModel(DailyChallenge.idFor(20_745L))
+        daily.onHint()
+        assertThat(daily.uiState.value.game.rewardedHintOffer).isFalse()
+        daily.onWatchAdForHint(Activity())
+        assertThat(adsGateway.rewardedShows).isEqualTo(1)
     }
 
     @Test

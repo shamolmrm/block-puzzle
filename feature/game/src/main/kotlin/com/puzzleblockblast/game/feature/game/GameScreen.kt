@@ -1,5 +1,6 @@
 package com.puzzleblockblast.game.feature.game
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateIntAsState
@@ -79,6 +80,7 @@ fun GameRoute(
     viewModel: GameViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val activity = LocalActivity.current
     // Leaving the app mid-game pauses it; the game itself is already saved after every move.
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.onPause() }
     GameScreen(
@@ -91,6 +93,11 @@ fun GameRoute(
         onRestart = viewModel::onRestart,
         onMessageShown = viewModel::onMessageShown,
         onHome = onBack,
+        onWatchAdForUndo = { activity?.let(viewModel::onWatchAdForUndo) },
+        onWatchAdForHint = { activity?.let(viewModel::onWatchAdForHint) },
+        // Leaving a finished game is a natural break: an interstitial may show (paced, consented).
+        onPlayAgain = { if (activity != null) viewModel.onBreak(activity, viewModel::onRestart) else viewModel.onRestart() },
+        onGameOverHome = { if (activity != null) viewModel.onBreak(activity, onBack) else onBack() },
     )
 }
 
@@ -112,6 +119,11 @@ fun GameScreen(
     header: (@Composable () -> Unit)? = null,
     /** Classic's "No more moves" card; Level Mode shows its own result instead. */
     showGameOver: Boolean = true,
+    onWatchAdForUndo: () -> Unit = {},
+    onWatchAdForHint: () -> Unit = {},
+    /** Game-over card actions; default to the plain restart / home actions. */
+    onPlayAgain: () -> Unit = onRestart,
+    onGameOverHome: () -> Unit = onHome,
 ) {
     PbbBackground(modifier = modifier) {
         val game = state.game
@@ -245,11 +257,24 @@ fun GameScreen(
                 )
                 if (showControls) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        FilledTonalButton(onClick = onUndo, enabled = state.canUndo, modifier = Modifier.heightIn(min = 48.dp)) {
-                            Text(stringResource(R.string.game_undo, game.undosRemaining))
+                        // When the free ones are used up, the same button offers an optional rewarded ad.
+                        if (state.rewardedUndoOffer) {
+                            FilledTonalButton(onClick = onWatchAdForUndo, modifier = Modifier.heightIn(min = 48.dp)) {
+                                Text(stringResource(R.string.game_undo_ad))
+                            }
+                        } else {
+                            FilledTonalButton(onClick = onUndo, enabled = state.canUndo, modifier = Modifier.heightIn(min = 48.dp)) {
+                                Text(stringResource(R.string.game_undo, game.undosRemaining))
+                            }
                         }
-                        FilledTonalButton(onClick = onHint, enabled = state.canHint, modifier = Modifier.heightIn(min = 48.dp)) {
-                            Text(stringResource(R.string.game_hint, game.hintsRemaining))
+                        if (state.rewardedHintOffer) {
+                            FilledTonalButton(onClick = onWatchAdForHint, modifier = Modifier.heightIn(min = 48.dp)) {
+                                Text(stringResource(R.string.game_hint_ad))
+                            }
+                        } else {
+                            FilledTonalButton(onClick = onHint, enabled = state.canHint, modifier = Modifier.heightIn(min = 48.dp)) {
+                                Text(stringResource(R.string.game_hint, game.hintsRemaining))
+                            }
                         }
                     }
                 }
@@ -282,8 +307,8 @@ fun GameScreen(
                     best = state.displayBest,
                     isNewBest = state.isNewBest,
                     reward = state.reward,
-                    onPlayAgain = onRestart,
-                    onHome = onHome,
+                    onPlayAgain = onPlayAgain,
+                    onHome = onGameOverHome,
                 )
                 state.isPaused -> PauseOverlay(onResume = onResume, onRestart = onRestart, onHome = onHome)
             }

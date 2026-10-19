@@ -28,5 +28,8 @@ data class ClassicRules(
     companion object {
         /** Upper bound for any configured hint count (remote config clamps to this too). */
         const val MAX_HINTS_PER_GAME = 5
+
+        /** Free undos plus rewarded ones can never exceed this (docs/PLAN.md §4: max 3 per game). */
+        const val MAX_UNDOS_PER_GAME = 3
     }
 }
