@@ -38,4 +38,28 @@
     <string name="tutorial_done_title">You\'re ready!</string>
     <string name="tutorial_done_body">Pieces can\'t be rotated. Clear lines back to back for a combo. The game ends when none of your pieces fit, so keep space open. Undo and Hints help when you\'re stuck.</string>
     <string name="tutorial_play">Play Classic</string>
+
+    <string name="level_title">Level %1$d</string>
+    <plurals name="level_moves_left">
+        <item quantity="one">move left</item>
+        <item quantity="other">moves left</item>
+    </plurals>
+    <string name="level_goal_score">Score %1$d/%2$d</string>
+    <string name="level_goal_lines">Lines %1$d/%2$d</string>
+    <string name="level_goal_gems">Gems %1$d/%2$d</string>
+    <string name="level_complete">Level complete!</string>
+    <string name="level_stars_description">%1$d of 3 stars</string>
+    <plurals name="level_result_summary">
+        <item quantity="one">Score %1$d · %2$d move</item>
+        <item quantity="other">Score %1$d · %2$d moves</item>
+    </plurals>
+    <string name="level_next">Next level</string>
+    <string name="level_all_done">You\'ve finished every level so far. More are coming!</string>
+    <string name="level_replay">Replay</string>
+    <string name="level_back_to_levels">Levels</string>
+    <string name="level_failed_moves">Out of moves</string>
+    <string name="level_failed_space">No room left</string>
+    <string name="level_failed_body">So close! Every level can be beaten. Try a different opening.</string>
+    <string name="level_retry">Try again</string>
+    <string name="level_unavailable">This level isn\'t available.</string>
 </resources>

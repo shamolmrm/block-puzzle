@@ -8,6 +8,13 @@ import androidx.datastore.preferences.preferencesDataStoreFile
 import com.puzzleblockblast.game.core.data.classic.ClassicDataStore
 import com.puzzleblockblast.game.core.data.classic.ClassicGameRepository
 import com.puzzleblockblast.game.core.data.classic.DataStoreClassicGameRepository
+import androidx.room.Room
+import com.puzzleblockblast.game.core.data.level.BundledLevelRepository
+import com.puzzleblockblast.game.core.data.level.LevelProgressDao
+import com.puzzleblockblast.game.core.data.level.LevelProgressRepository
+import com.puzzleblockblast.game.core.data.level.LevelRepository
+import com.puzzleblockblast.game.core.data.level.PbbDatabase
+import com.puzzleblockblast.game.core.data.level.RoomLevelProgressRepository
 import com.puzzleblockblast.game.core.data.settings.DataStoreSettingsRepository
 import com.puzzleblockblast.game.core.data.settings.SettingsDataStore
 import com.puzzleblockblast.game.core.data.settings.SettingsRepository
@@ -35,7 +42,21 @@ abstract class DataModule {
     @Singleton
     abstract fun bindClassicGameRepository(impl: DataStoreClassicGameRepository): ClassicGameRepository
 
+    @Binds
+    abstract fun bindLevelRepository(impl: BundledLevelRepository): LevelRepository
+
+    @Binds
+    abstract fun bindLevelProgressRepository(impl: RoomLevelProgressRepository): LevelProgressRepository
+
     companion object {
+        @Provides
+        @Singleton
+        fun provideDatabase(@ApplicationContext context: Context): PbbDatabase =
+            Room.databaseBuilder(context, PbbDatabase::class.java, "pbb.db").build()
+
+        @Provides
+        fun provideLevelProgressDao(db: PbbDatabase): LevelProgressDao = db.levelProgressDao()
+
         @Provides
         @Singleton
         @SettingsDataStore

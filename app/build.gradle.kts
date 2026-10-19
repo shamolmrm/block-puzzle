@@ -34,6 +34,7 @@ dependencies {
     implementation(project(":core:audio"))
     implementation(project(":feature:home"))
     implementation(project(":feature:game"))
+    implementation(project(":feature:levels"))
     implementation(project(":feature:settings"))
 
     implementation(libs.androidx.core.ktx)

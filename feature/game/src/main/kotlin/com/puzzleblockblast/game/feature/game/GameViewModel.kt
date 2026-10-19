@@ -55,8 +55,10 @@ data class GameUiState(
     val isNewBest: Boolean = false,
     val message: GameMessage? = null,
     val settings: UserSettings = UserSettings(),
+    /** Set by modes with their own end conditions (a won or failed level): blocks all input. */
+    val isEnded: Boolean = false,
 ) {
-    val isPlaying: Boolean get() = game != null && !game.isGameOver && !isPaused
+    val isPlaying: Boolean get() = game != null && !game.isGameOver && !isPaused && !isEnded
     val canUndo: Boolean get() = isPlaying && game?.canUndo == true
     val canHint: Boolean get() = isPlaying && (game?.hintsRemaining ?: 0) > 0
     val displayBest: Int get() = maxOf(bestScore, game?.score ?: 0)

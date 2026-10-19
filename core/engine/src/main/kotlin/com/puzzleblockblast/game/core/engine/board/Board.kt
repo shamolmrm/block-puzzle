@@ -64,6 +64,9 @@ class Board private constructor(
 
     companion object {
         const val EMPTY = 0
+
+        /** A pre-placed gem (Level Mode). Behaves like any filled cell; clearing its line collects it. */
+        const val GEM = 99
         const val CLASSIC_SIZE = 10
         const val MAX_SIZE = 12
 

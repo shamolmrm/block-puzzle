@@ -24,6 +24,9 @@ object AnalyticsEvents {
         const val MOVES = "moves"
         const val SOURCE = "source"
         const val SKIPPED = "skipped"
+        const val LEVEL_ID = "level_id"
+        const val STARS = "stars"
+        const val REASON = "reason"
     }
 
     /** Coarse score ranges: exact scores add nothing for retention analysis. */

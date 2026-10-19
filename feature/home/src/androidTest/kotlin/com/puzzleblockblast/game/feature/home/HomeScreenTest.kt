@@ -19,15 +19,25 @@ class HomeScreenTest {
     val compose = createComposeRule()
 
     @Test
-    fun classicIsEnabledAndOtherModesAreComingSoon() {
+    fun classicAndLevelsAreEnabledAndOtherModesAreComingSoon() {
         var classicClicks = 0
+        var levelClicks = 0
         compose.setContent {
-            PbbTheme { HomeScreen(onPlayClassic = { classicClicks++ }, onOpenSettings = {}, onHowToPlay = {}) }
+            PbbTheme {
+                HomeScreen(
+                    onPlayClassic = { classicClicks++ },
+                    onPlayLevels = { levelClicks++ },
+                    onOpenSettings = {},
+                    onHowToPlay = {},
+                )
+            }
         }
 
         compose.onNodeWithText("Classic").assertIsEnabled().performClick()
-        compose.onNodeWithText("Levels", substring = true).assertIsNotEnabled()
+        compose.onNodeWithText("Levels").assertIsEnabled().performClick()
         compose.onNodeWithText("Daily Challenge", substring = true).assertIsNotEnabled()
+        compose.onNodeWithText("Events", substring = true).assertIsNotEnabled()
         assertEquals(1, classicClicks)
+        assertEquals(1, levelClicks)
     }
 }

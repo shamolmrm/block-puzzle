@@ -8,6 +8,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -76,6 +77,7 @@ fun BoardCanvas(
                     tile == Board.EMPTY -> drawEmptyCell(r, c, cell, colors.emptyCell)
                     // Filled cells in a line about to clear take the dragged piece's colour.
                     clearing -> drawCellBlock(r, c, cell, previewColor!!)
+                    tile == Board.GEM -> drawGem(r, c, cell, colors)
                     else -> drawCellBlock(r, c, cell, colors.tile(tile))
                 }
             }
@@ -90,6 +92,23 @@ private const val GHOST_ALPHA = 0.5f
 private fun DrawScope.drawCellBlock(row: Int, col: Int, cell: Float, color: Color, alpha: Float = 1f) {
     val gap = cell * 0.06f
     drawBlock(Offset(col * cell + gap, row * cell + gap), cell - 2 * gap, color, alpha)
+}
+
+/** A gem: a teal block with a bright diamond, so it reads differently from colour blocks (not colour alone). */
+private fun DrawScope.drawGem(row: Int, col: Int, cell: Float, colors: BoardColors) {
+    drawCellBlock(row, col, cell, colors.gem)
+    val cx = col * cell + cell / 2
+    val cy = row * cell + cell * 0.46f
+    val r = cell * 0.26f
+    val diamond = Path().apply {
+        moveTo(cx, cy - r)
+        lineTo(cx + r, cy)
+        lineTo(cx, cy + r)
+        lineTo(cx - r, cy)
+        close()
+    }
+    drawPath(diamond, colors.gemFacet)
+    drawPath(diamond, Color.White, style = Stroke(width = cell * 0.05f))
 }
 
 private fun DrawScope.drawEmptyCell(row: Int, col: Int, cell: Float, color: Color) {

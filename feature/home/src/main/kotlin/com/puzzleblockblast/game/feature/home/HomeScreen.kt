@@ -43,6 +43,7 @@ import com.puzzleblockblast.game.core.designsystem.theme.PbbTheme
 @Composable
 fun HomeScreen(
     onPlayClassic: () -> Unit,
+    onPlayLevels: () -> Unit,
     onOpenSettings: () -> Unit,
     onHowToPlay: () -> Unit,
     modifier: Modifier = Modifier,
@@ -80,7 +81,7 @@ fun HomeScreen(
             ) {
                 PbbMenuButton(text = stringResource(R.string.home_classic), onClick = onPlayClassic, hero = true)
                 // Implemented in later phases; visible but disabled so the menu layout is final.
-                PbbMenuButton(stringResource(R.string.home_levels), {}, enabled = false, supportingText = comingSoon)
+                PbbMenuButton(stringResource(R.string.home_levels), onPlayLevels)
                 PbbMenuButton(stringResource(R.string.home_daily), {}, enabled = false, supportingText = comingSoon)
                 PbbMenuButton(stringResource(R.string.home_events), {}, enabled = false, supportingText = comingSoon)
                 Row(
@@ -131,5 +132,5 @@ private fun BlockLogo() {
 @Preview
 @Composable
 private fun HomeScreenPreview() {
-    PbbTheme { HomeScreen(onPlayClassic = {}, onOpenSettings = {}, onHowToPlay = {}) }
+    PbbTheme { HomeScreen(onPlayClassic = {}, onPlayLevels = {}, onOpenSettings = {}, onHowToPlay = {}) }
 }

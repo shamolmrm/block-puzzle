@@ -110,6 +110,8 @@ fun GameScreen(
     showControls: Boolean = true,
     /** Replaces the score bar when set (the tutorial shows its instructions there). */
     header: (@Composable () -> Unit)? = null,
+    /** Classic's "No more moves" card; Level Mode shows its own result instead. */
+    showGameOver: Boolean = true,
 ) {
     PbbBackground(modifier = modifier) {
         val game = state.game
@@ -275,7 +277,7 @@ fun GameScreen(
             SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter).safeDrawingPadding())
 
             when {
-                game.isGameOver -> GameOverOverlay(
+                game.isGameOver && showGameOver -> GameOverOverlay(
                     score = game.score,
                     best = state.displayBest,
                     isNewBest = state.isNewBest,
@@ -325,6 +327,24 @@ private fun MovePopup(outcome: MoveOutcome, progress: Float) {
     }
 }
 
+/** Round pause button with a drawn icon; announced as "Pause". */
+@Composable
+internal fun PauseButton(enabled: Boolean, onPause: () -> Unit) {
+    val pauseLabel = stringResource(R.string.game_pause)
+    FilledTonalIconButton(
+        onClick = onPause,
+        enabled = enabled,
+        modifier = Modifier.size(52.dp).semantics { contentDescription = pauseLabel },
+    ) {
+        val iconColor = MaterialTheme.colorScheme.onSecondaryContainer
+        Canvas(Modifier.size(18.dp)) {
+            val bar = size.width * 0.32f
+            drawRoundRect(iconColor, Offset.Zero, Size(bar, size.height), CornerRadius(bar / 3))
+            drawRoundRect(iconColor, Offset(size.width - bar, 0f), Size(bar, size.height), CornerRadius(bar / 3))
+        }
+    }
+}
+
 @Composable
 private fun ScoreBar(
     score: Int,
@@ -337,23 +357,11 @@ private fun ScoreBar(
 ) {
     val countUp by animateIntAsState(score, tween(400), label = "score")
     val animatedScore = if (animate) countUp else score
-    val pauseLabel = stringResource(R.string.game_pause)
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        FilledTonalIconButton(
-            onClick = onPause,
-            enabled = pauseEnabled,
-            modifier = Modifier.size(52.dp).semantics { contentDescription = pauseLabel },
-        ) {
-            val iconColor = MaterialTheme.colorScheme.onSecondaryContainer
-            Canvas(Modifier.size(18.dp)) {
-                val bar = size.width * 0.32f
-                drawRoundRect(iconColor, Offset.Zero, Size(bar, size.height), CornerRadius(bar / 3))
-                drawRoundRect(iconColor, Offset(size.width - bar, 0f), Size(bar, size.height), CornerRadius(bar / 3))
-            }
-        }
+        PauseButton(enabled = pauseEnabled, onPause = onPause)
         Column(
             modifier = Modifier.weight(1f).semantics { liveRegion = LiveRegionMode.Polite },
             horizontalAlignment = Alignment.CenterHorizontally,

@@ -16,8 +16,9 @@ class ClassicGame(
     val catalog: ShapeCatalog = ShapeCatalog.Classic,
 ) {
 
-    fun newGame(seed: Long): GameState {
-        val board = Board.empty(rules.boardSize)
+    /** Starts a game on [board] (empty by default; levels pass their pre-filled layout). */
+    fun newGame(seed: Long, board: Board = Board.empty(rules.boardSize)): GameState {
+        require(board.rows == rules.boardSize && board.cols == rules.boardSize) { "Board must be ${rules.boardSize} square" }
         val rng = Pcg32.seeded(seed)
         val tray = deal(board, rng)
         return GameState(
@@ -29,7 +30,8 @@ class ClassicGame(
             moves = 0,
             linesCleared = 0,
             rng = rng.snapshot(),
-            status = GameStatus.PLAYING,
+            // Only possible on a pre-filled (level) board: nothing in the pool fits at all.
+            status = if (tray.filterNotNull().any { Placement.fitsAnywhere(board, it.shape) }) GameStatus.PLAYING else GameStatus.GAME_OVER,
             undosRemaining = rules.undosPerGame,
             hintsRemaining = rules.hintsPerGame,
             previous = null,

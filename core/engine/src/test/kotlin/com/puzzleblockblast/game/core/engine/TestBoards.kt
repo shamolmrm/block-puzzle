@@ -7,9 +7,17 @@ import com.puzzleblockblast.game.core.engine.classic.Piece
 import com.puzzleblockblast.game.core.engine.random.Pcg32
 import com.puzzleblockblast.game.core.engine.shape.ShapeCatalog
 
-/** Builds a board from rows of `.` (empty) and `X` (tile 1). */
+/** Builds a board from rows of `.` (empty), `G` (gem) and `X` (tile 1). */
 fun boardOf(vararg rows: String): Board {
-    val tiles = rows.flatMap { row -> row.map { if (it == '.') Board.EMPTY else 1 } }.toIntArray()
+    val tiles = rows.flatMap { row ->
+        row.map {
+            when (it) {
+                '.' -> Board.EMPTY
+                'G' -> Board.GEM
+                else -> 1
+            }
+        }
+    }.toIntArray()
     return Board.fromTiles(rows.size, rows.first().length, tiles)
 }
 

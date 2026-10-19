@@ -29,6 +29,9 @@ data class BoardColors(
     val ghostValid: Color,
     val ghostInvalid: Color,
     val tiles: List<Color>,
+    /** Level Mode gem tiles. */
+    val gem: Color = Color(0xFF0E8C8F),
+    val gemFacet: Color = Color(0xFFB8FFF9),
 ) {
     fun tile(tileId: Int): Color = tiles[(tileId - 1).mod(tiles.size)]
 }

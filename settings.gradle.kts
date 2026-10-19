@@ -37,4 +37,5 @@ include(":core:testing")
 
 include(":feature:home")
 include(":feature:game")
+include(":feature:levels")
 include(":feature:settings")

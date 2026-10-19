@@ -1,0 +1,8 @@
+<resources>
+    <string name="levels_title">Levels</string>
+    <string name="levels_back">Back</string>
+    <string name="levels_total_stars">★ %1$d/%2$d</string>
+    <string name="levels_unavailable">Levels couldn\'t be loaded. Please reinstall or update the app.</string>
+    <string name="levels_tile">Level %1$d, %2$d of 3 stars</string>
+    <string name="levels_tile_locked">Level %1$d, locked. Finish the previous level to unlock it.</string>
+</resources>

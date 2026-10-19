@@ -13,6 +13,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.puzzleblockblast.game.core.designsystem.theme.LocalReducedMotion
 import com.puzzleblockblast.game.feature.game.navigation.ClassicGameRoute
+import com.puzzleblockblast.game.feature.game.navigation.LevelPlayRoute
+import com.puzzleblockblast.game.feature.game.navigation.levelPlayScreen
+import com.puzzleblockblast.game.feature.levels.navigation.LevelSelectDestination
+import com.puzzleblockblast.game.feature.levels.navigation.levelSelectScreen
 import com.puzzleblockblast.game.feature.game.navigation.TutorialDestination
 import com.puzzleblockblast.game.feature.game.navigation.classicGameScreen
 import com.puzzleblockblast.game.feature.game.navigation.tutorialScreen
@@ -41,8 +45,22 @@ fun PbbNavHost(tutorialCompleted: Boolean, modifier: Modifier = Modifier) {
                 val destination: Any = if (tutorialCompleted) ClassicGameRoute else TutorialDestination(thenPlay = true)
                 navController.navigate(destination) { launchSingleTop = true }
             },
+            onPlayLevels = { navController.navigate(LevelSelectDestination) { launchSingleTop = true } },
             onOpenSettings = { navController.navigate(SettingsDestination) { launchSingleTop = true } },
             onHowToPlay = { navController.navigate(TutorialDestination(thenPlay = false)) { launchSingleTop = true } },
+        )
+        levelSelectScreen(
+            onOpenLevel = { id -> navController.navigate(LevelPlayRoute(id)) { launchSingleTop = true } },
+            onBack = navController::popBackStack,
+        )
+        levelPlayScreen(
+            onLevels = { navController.popBackStack(LevelSelectDestination, inclusive = false) },
+            // "Next level" replaces the finished level, so Back still returns to the level list.
+            onNextLevel = { id ->
+                navController.navigate(LevelPlayRoute(id)) {
+                    popUpTo<LevelSelectDestination> { inclusive = false }
+                }
+            },
         )
         tutorialScreen(
             onDone = { thenPlay ->

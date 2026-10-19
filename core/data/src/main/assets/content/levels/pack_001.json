@@ -1,0 +1,2126 @@
+{
+ "schemaVersion": 1,
+ "contentVersion": 1,
+ "packId": "pack_001",
+ "levels": [
+  {
+   "id": "L0001",
+   "index": 1,
+   "boardSize": 10,
+   "initialBoard": [
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "666...1112"
+   ],
+   "pieces": {
+    "seed": 8919,
+    "pool": [
+     "i3",
+     "i2",
+     "dot"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearLines",
+     "count": 1
+    }
+   ],
+   "limits": {
+    "maxMoves": 8
+   },
+   "stars": [
+    5,
+    3
+   ],
+   "undoAllowance": 2,
+   "hintAllowance": 3
+  },
+  {
+   "id": "L0002",
+   "index": 2,
+   "boardSize": 10,
+   "initialBoard": [
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "77711122..",
+    "..71112223"
+   ],
+   "pieces": {
+    "seed": 16838,
+    "pool": [
+     "i2",
+     "sq2",
+     "dot"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearLines",
+     "count": 2
+    }
+   ],
+   "limits": {
+    "maxMoves": 10
+   },
+   "stars": [
+    7,
+    4
+   ],
+   "undoAllowance": 2,
+   "hintAllowance": 3
+  },
+  {
+   "id": "L0003",
+   "index": 3,
+   "boardSize": 10,
+   "initialBoard": [
+    "4.........",
+    "4.........",
+    "5.........",
+    "5........1",
+    ".........2",
+    ".........2",
+    ".........3",
+    "7........3",
+    "1........4",
+    "1........4"
+   ],
+   "pieces": {
+    "seed": 24757,
+    "pool": [
+     "i3",
+     "i2"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearLines",
+     "count": 2
+    }
+   ],
+   "limits": {
+    "maxMoves": 10
+   },
+   "stars": [
+    8,
+    7
+   ],
+   "undoAllowance": 2,
+   "hintAllowance": 3
+  },
+  {
+   "id": "L0004",
+   "index": 4,
+   "boardSize": 10,
+   "initialBoard": [
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    ".........."
+   ],
+   "pieces": {
+    "seed": 32676,
+    "pool": [
+     "i3",
+     "i4",
+     "sq2"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "scoreAtLeast",
+     "value": 70
+    }
+   ],
+   "limits": {
+    "maxMoves": 18
+   },
+   "stars": [
+    16,
+    14
+   ],
+   "undoAllowance": 2,
+   "hintAllowance": 3
+  },
+  {
+   "id": "L0005",
+   "index": 5,
+   "boardSize": 10,
+   "initialBoard": [
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "33..44..56",
+    "33..44..56"
+   ],
+   "pieces": {
+    "seed": 40595,
+    "pool": [
+     "sq2",
+     "i2",
+     "dot"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearLines",
+     "count": 3
+    }
+   ],
+   "limits": {
+    "maxMoves": 12
+   },
+   "stars": [
+    10,
+    8
+   ],
+   "undoAllowance": 2,
+   "hintAllowance": 3
+  },
+  {
+   "id": "L0006",
+   "index": 6,
+   "boardSize": 10,
+   "initialBoard": [
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "3334..5556",
+    "3334..5556",
+    "4445..6667",
+    "4445..6667"
+   ],
+   "pieces": {
+    "seed": 48514,
+    "pool": [
+     "i2",
+     "i4",
+     "sq2"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearLines",
+     "count": 4
+    }
+   ],
+   "limits": {
+    "maxMoves": 14
+   },
+   "stars": [
+    10,
+    7
+   ],
+   "undoAllowance": 2,
+   "hintAllowance": 3
+  },
+  {
+   "id": "L0007",
+   "index": 7,
+   "boardSize": 10,
+   "initialBoard": [
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "3334......",
+    "44455.....",
+    "444555....",
+    "5556667...",
+    "55566677.."
+   ],
+   "pieces": {
+    "seed": 56433,
+    "pool": [
+     "i3",
+     "i4",
+     "l4"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearLines",
+     "count": 3
+    },
+    {
+     "type": "scoreAtLeast",
+     "value": 80
+    }
+   ],
+   "limits": {
+    "maxMoves": 16
+   },
+   "stars": [
+    11,
+    7
+   ],
+   "undoAllowance": 2,
+   "hintAllowance": 3
+  },
+  {
+   "id": "L0008",
+   "index": 8,
+   "boardSize": 10,
+   "initialBoard": [
+    "2223..4445",
+    "2........5",
+    "3........6",
+    "3........6",
+    "..........",
+    "..........",
+    "5........1",
+    "5........1",
+    "6........2",
+    "6667..1112"
+   ],
+   "pieces": {
+    "seed": 64352,
+    "pool": [
+     "i2",
+     "sq2",
+     "i3"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearLines",
+     "count": 4
+    }
+   ],
+   "limits": {
+    "maxMoves": 16
+   },
+   "stars": [
+    13,
+    11
+   ],
+   "undoAllowance": 2,
+   "hintAllowance": 3
+  },
+  {
+   "id": "L0009",
+   "index": 9,
+   "boardSize": 10,
+   "initialBoard": [
+    "....4.....",
+    ".........6",
+    "..........",
+    ".4.....6..",
+    "......7...",
+    "..5....7..",
+    ".66...1...",
+    ".....711..",
+    "77.......3",
+    "......22.."
+   ],
+   "pieces": {
+    "seed": 72271,
+    "pool": [
+     "i3",
+     "i2",
+     "sq2",
+     "c3"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "scoreAtLeast",
+     "value": 100
+    }
+   ],
+   "limits": {
+    "maxMoves": 22
+   },
+   "stars": [
+    20,
+    18
+   ],
+   "undoAllowance": 2,
+   "hintAllowance": 3
+  },
+  {
+   "id": "L0010",
+   "index": 10,
+   "boardSize": 10,
+   "initialBoard": [
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "66.77711..",
+    "77711.22..",
+    "7.711122..",
+    "111222.3..",
+    "111.2233.."
+   ],
+   "pieces": {
+    "seed": 80190,
+    "pool": [
+     "i2",
+     "dot",
+     "sq2",
+     "i3"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearLines",
+     "count": 5
+    }
+   ],
+   "limits": {
+    "maxMoves": 18
+   },
+   "stars": [
+    15,
+    13
+   ],
+   "undoAllowance": 2,
+   "hintAllowance": 3
+  },
+  {
+   "id": "L0011",
+   "index": 11,
+   "boardSize": 10,
+   "initialBoard": [
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "G223..4445"
+   ],
+   "pieces": {
+    "seed": 88109,
+    "pool": [
+     "i2",
+     "dot"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 8
+   },
+   "stars": [
+    6,
+    4
+   ],
+   "undoAllowance": 2,
+   "hintAllowance": 3
+  },
+  {
+   "id": "L0012",
+   "index": 12,
+   "boardSize": 10,
+   "initialBoard": [
+    ".....G....",
+    ".....7....",
+    ".....1....",
+    ".....1....",
+    ".....2....",
+    ".....2....",
+    ".....3....",
+    "..........",
+    "..........",
+    "33G4445..."
+   ],
+   "pieces": {
+    "seed": 96028,
+    "pool": [
+     "i3",
+     "i2"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 12
+   },
+   "stars": [
+    8,
+    5
+   ],
+   "undoAllowance": 2,
+   "hintAllowance": 3
+  },
+  {
+   "id": "L0013",
+   "index": 13,
+   "boardSize": 10,
+   "initialBoard": [
+    ".......2..",
+    ".....1....",
+    "..G.......",
+    ".......33.",
+    ".......4..",
+    ".2.....G.5",
+    "..........",
+    "........5.",
+    "....G.....",
+    "...5......"
+   ],
+   "pieces": {
+    "seed": 103947,
+    "pool": [
+     "i3",
+     "i4",
+     "sq2",
+     "i2"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 20
+   },
+   "stars": [
+    17,
+    15
+   ],
+   "undoAllowance": 2,
+   "hintAllowance": 3
+  },
+  {
+   "id": "L0014",
+   "index": 14,
+   "boardSize": 10,
+   "initialBoard": [
+    "G11....33G",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    ".........."
+   ],
+   "pieces": {
+    "seed": 111866,
+    "pool": [
+     "i4",
+     "i2",
+     "sq2"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    },
+    {
+     "type": "clearLines",
+     "count": 3
+    }
+   ],
+   "limits": {
+    "maxMoves": 16
+   },
+   "stars": [
+    13,
+    11
+   ],
+   "undoAllowance": 2,
+   "hintAllowance": 3
+  },
+  {
+   "id": "L0015",
+   "index": 15,
+   "boardSize": 10,
+   "initialBoard": [
+    "..........",
+    "2G2.3.44.5",
+    "..........",
+    "..........",
+    ".445G5.66.",
+    "..........",
+    "..........",
+    "55..667G7.",
+    "..........",
+    ".........."
+   ],
+   "pieces": {
+    "seed": 119785,
+    "pool": [
+     "i3",
+     "dot",
+     "i2",
+     "c3"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 18
+   },
+   "stars": [
+    14,
+    10
+   ],
+   "undoAllowance": 2,
+   "hintAllowance": 3
+  },
+  {
+   "id": "L0016",
+   "index": 16,
+   "boardSize": 10,
+   "initialBoard": [
+    "..........",
+    "..........",
+    "..........",
+    "...5556...",
+    "...6G67...",
+    "...66G7...",
+    "...7771...",
+    "..........",
+    "..........",
+    ".........."
+   ],
+   "pieces": {
+    "seed": 127704,
+    "pool": [
+     "i3",
+     "i4",
+     "sq2",
+     "l4"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    },
+    {
+     "type": "scoreAtLeast",
+     "value": 100
+    }
+   ],
+   "limits": {
+    "maxMoves": 20
+   },
+   "stars": [
+    17,
+    14
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 2
+  },
+  {
+   "id": "L0017",
+   "index": 17,
+   "boardSize": 10,
+   "initialBoard": [
+    "..G.......",
+    "..4.......",
+    "..5.......",
+    "..........",
+    "..6.......",
+    "..6.......",
+    "..7.......",
+    "..........",
+    "..1.......",
+    "..G......."
+   ],
+   "pieces": {
+    "seed": 135623,
+    "pool": [
+     "dot",
+     "i2",
+     "c3"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 12
+   },
+   "stars": [
+    8,
+    4
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 2
+  },
+  {
+   "id": "L0018",
+   "index": 18,
+   "boardSize": 10,
+   "initialBoard": [
+    "G5......7G",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "G2......4G"
+   ],
+   "pieces": {
+    "seed": 143542,
+    "pool": [
+     "i2",
+     "i3",
+     "i4",
+     "sq2"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 22
+   },
+   "stars": [
+    15,
+    9
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 2
+  },
+  {
+   "id": "L0019",
+   "index": 19,
+   "boardSize": 10,
+   "initialBoard": [
+    "..6...11..",
+    "...7G...1.",
+    ".......2..",
+    "G.....22..",
+    "..12......",
+    "..1.......",
+    ".2........",
+    ".2.....4G.",
+    ".....4....",
+    ".........."
+   ],
+   "pieces": {
+    "seed": 151461,
+    "pool": [
+     "i3",
+     "sq2",
+     "l4",
+     "j4"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    },
+    {
+     "type": "clearLines",
+     "count": 4
+    }
+   ],
+   "limits": {
+    "maxMoves": 22
+   },
+   "stars": [
+    19,
+    17
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 2
+  },
+  {
+   "id": "L0020",
+   "index": 20,
+   "boardSize": 10,
+   "initialBoard": [
+    "....G.....",
+    "..........",
+    "....2.....",
+    "....2.....",
+    "G2.3G3..4G",
+    "....3.....",
+    "....4.....",
+    "..........",
+    "....5.....",
+    "....G....."
+   ],
+   "pieces": {
+    "seed": 159380,
+    "pool": [
+     "i2",
+     "i3",
+     "dot",
+     "sq2"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 22
+   },
+   "stars": [
+    16,
+    11
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 2
+  },
+  {
+   "id": "L0021",
+   "index": 21,
+   "boardSize": 10,
+   "initialBoard": [
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    ".........."
+   ],
+   "pieces": {
+    "seed": 167299,
+    "pool": [
+     "t4",
+     "s4",
+     "z4",
+     "i2"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearLines",
+     "count": 4
+    }
+   ],
+   "limits": {
+    "maxMoves": 22
+   },
+   "stars": [
+    20,
+    18
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 2
+  },
+  {
+   "id": "L0022",
+   "index": 22,
+   "boardSize": 10,
+   "initialBoard": [
+    ".2........",
+    "......4...",
+    "3..4..5...",
+    "..........",
+    "4.4.......",
+    ".......6..",
+    "...6......",
+    ".........1",
+    ".........2",
+    "...7......"
+   ],
+   "pieces": {
+    "seed": 175218,
+    "pool": [
+     "l4",
+     "j4",
+     "t4",
+     "sq2"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "scoreAtLeast",
+     "value": 120
+    }
+   ],
+   "limits": {
+    "maxMoves": 22
+   },
+   "stars": [
+    18,
+    15
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 2
+  },
+  {
+   "id": "L0023",
+   "index": 23,
+   "boardSize": 10,
+   "initialBoard": [
+    "......5.5.",
+    "3.........",
+    "......6G..",
+    "..........",
+    "........7.",
+    "5.........",
+    "..G..7..1.",
+    "6...7.1...",
+    "....11..G.",
+    "..7......."
+   ],
+   "pieces": {
+    "seed": 183137,
+    "pool": [
+     "c3",
+     "c5",
+     "i3"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 20
+   },
+   "stars": [
+    17,
+    15
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 2
+  },
+  {
+   "id": "L0024",
+   "index": 24,
+   "boardSize": 10,
+   "initialBoard": [
+    "4.455.66.7",
+    ".445.56.67",
+    "55.666.77.",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    ".........."
+   ],
+   "pieces": {
+    "seed": 191056,
+    "pool": [
+     "i4",
+     "i5",
+     "sq2"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearLines",
+     "count": 6
+    }
+   ],
+   "limits": {
+    "maxMoves": 26
+   },
+   "stars": [
+    23,
+    21
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 2
+  },
+  {
+   "id": "L0025",
+   "index": 25,
+   "boardSize": 10,
+   "initialBoard": [
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    ".........."
+   ],
+   "pieces": {
+    "seed": 198975,
+    "pool": [
+     "sq3",
+     "i3",
+     "i2",
+     "dot"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "scoreAtLeast",
+     "value": 130
+    },
+    {
+     "type": "clearLines",
+     "count": 4
+    }
+   ],
+   "limits": {
+    "maxMoves": 24
+   },
+   "stars": [
+    21,
+    19
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 2
+  },
+  {
+   "id": "L0026",
+   "index": 26,
+   "boardSize": 10,
+   "initialBoard": [
+    "666...1112",
+    "G66...111G",
+    "777...2223",
+    "..........",
+    "..........",
+    "..........",
+    "G.23.344.5",
+    "..........",
+    "33.44.5.5G",
+    ".........."
+   ],
+   "pieces": {
+    "seed": 206894,
+    "pool": [
+     "sq3",
+     "sq2",
+     "i3",
+     "i2"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 24
+   },
+   "stars": [
+    18,
+    14
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 2
+  },
+  {
+   "id": "L0027",
+   "index": 27,
+   "boardSize": 10,
+   "initialBoard": [
+    "...11.2...",
+    "....1.....",
+    "G.........",
+    "..G.2.....",
+    "2.2.......",
+    "........45",
+    "..........",
+    "3.........",
+    ".44.5....7",
+    ".....5..6."
+   ],
+   "pieces": {
+    "seed": 214813,
+    "pool": [
+     "l4",
+     "j4",
+     "c3",
+     "i3"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    },
+    {
+     "type": "clearLines",
+     "count": 5
+    }
+   ],
+   "limits": {
+    "maxMoves": 22
+   },
+   "stars": [
+    19,
+    16
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 2
+  },
+  {
+   "id": "L0028",
+   "index": 28,
+   "boardSize": 10,
+   "initialBoard": [
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    ".........."
+   ],
+   "pieces": {
+    "seed": 222732,
+    "pool": [
+     "r6",
+     "sq3",
+     "i5",
+     "i4"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "scoreAtLeast",
+     "value": 160
+    }
+   ],
+   "limits": {
+    "maxMoves": 24
+   },
+   "stars": [
+    21,
+    18
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 2
+  },
+  {
+   "id": "L0029",
+   "index": 29,
+   "boardSize": 10,
+   "initialBoard": [
+    "...G3..4..",
+    "...3..G...",
+    ".33....5..",
+    "..3.......",
+    ".4.G..66.7",
+    "....5.....",
+    "...6......",
+    ".5.....77.",
+    "6...G.....",
+    "..6......."
+   ],
+   "pieces": {
+    "seed": 230651,
+    "pool": [
+     "s4",
+     "z4",
+     "t4",
+     "i2",
+     "dot"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 24
+   },
+   "stars": [
+    19,
+    15
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 2
+  },
+  {
+   "id": "L0030",
+   "index": 30,
+   "boardSize": 10,
+   "initialBoard": [
+    ".........G",
+    "..........",
+    "..........",
+    "......G...",
+    "..........",
+    "..........",
+    "666G......",
+    "66677.....",
+    "777111....",
+    "G771112..."
+   ],
+   "pieces": {
+    "seed": 238570,
+    "pool": [
+     "l4",
+     "j4",
+     "t4",
+     "i3",
+     "sq2"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    },
+    {
+     "type": "scoreAtLeast",
+     "value": 120
+    }
+   ],
+   "limits": {
+    "maxMoves": 26
+   },
+   "stars": [
+    22,
+    18
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 2
+  },
+  {
+   "id": "L0031",
+   "index": 31,
+   "boardSize": 10,
+   "initialBoard": [
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    ".........."
+   ],
+   "pieces": {
+    "seed": 246489,
+    "pool": [
+     "i5",
+     "i4",
+     "i3"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearLines",
+     "count": 6
+    }
+   ],
+   "limits": {
+    "maxMoves": 28
+   },
+   "stars": [
+    26,
+    24
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0032",
+   "index": 32,
+   "boardSize": 10,
+   "initialBoard": [
+    "..5...777.",
+    "......7...",
+    "...7G..1.G",
+    ".......1..",
+    "......G...",
+    "7...G.2.2.",
+    "..1.G....4",
+    "1.........",
+    "......444.",
+    ".2..33...."
+   ],
+   "pieces": {
+    "seed": 254408,
+    "pool": [
+     "i2",
+     "i3",
+     "sq2",
+     "c3",
+     "dot"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 26
+   },
+   "stars": [
+    22,
+    18
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0033",
+   "index": 33,
+   "boardSize": 10,
+   "initialBoard": [
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    ".........."
+   ],
+   "pieces": {
+    "seed": 262327,
+    "pool": [
+     "sq3",
+     "r6",
+     "i3",
+     "l4"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "scoreAtLeast",
+     "value": 180
+    },
+    {
+     "type": "clearLines",
+     "count": 6
+    }
+   ],
+   "limits": {
+    "maxMoves": 26
+   },
+   "stars": [
+    24,
+    22
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0034",
+   "index": 34,
+   "boardSize": 10,
+   "initialBoard": [
+    "...11.22.3",
+    "7..11.G2..",
+    ".......3.4",
+    "1.1.......",
+    ".G.G3...4.",
+    ".....3.44.",
+    "3........6",
+    "3.34.4.55.",
+    "4...5.6...",
+    "44.5.56.6."
+   ],
+   "pieces": {
+    "seed": 270246,
+    "pool": [
+     "dot",
+     "i2",
+     "c3",
+     "i3"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 22
+   },
+   "stars": [
+    16,
+    12
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0035",
+   "index": 35,
+   "boardSize": 10,
+   "initialBoard": [
+    "....G.....",
+    "..1....3..",
+    "......4...",
+    ".G2.3...G.",
+    ".3...4....",
+    "..3.......",
+    "..G..5.G..",
+    "..........",
+    ".....6...1",
+    ".....G7..."
+   ],
+   "pieces": {
+    "seed": 278165,
+    "pool": [
+     "i4",
+     "i3",
+     "sq2",
+     "t4"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 32
+   },
+   "stars": [
+    29,
+    27
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0036",
+   "index": 36,
+   "boardSize": 10,
+   "initialBoard": [
+    "..2......5",
+    "2...3..4..",
+    "..3.4.5..6",
+    "...4..5556",
+    "...5......",
+    "..........",
+    ".5........",
+    "55.6....7.",
+    "66....11..",
+    "..67771.1."
+   ],
+   "pieces": {
+    "seed": 286084,
+    "pool": [
+     "t4",
+     "s4",
+     "z4",
+     "l4",
+     "j4"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearLines",
+     "count": 6
+    }
+   ],
+   "limits": {
+    "maxMoves": 26
+   },
+   "stars": [
+    22,
+    18
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0037",
+   "index": 37,
+   "boardSize": 10,
+   "initialBoard": [
+    ".3.....55.",
+    "3...4..5..",
+    ".....G....",
+    ".4G.5.....",
+    "G....67..1",
+    "5..6..7.7.",
+    ".6.7...G..",
+    "..6....11.",
+    ".7..1.....",
+    "..7.1....3"
+   ],
+   "pieces": {
+    "seed": 294003,
+    "pool": [
+     "c5",
+     "c3",
+     "i3",
+     "sq2"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    },
+    {
+     "type": "clearLines",
+     "count": 5
+    }
+   ],
+   "limits": {
+    "maxMoves": 30
+   },
+   "stars": [
+    28,
+    26
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0038",
+   "index": 38,
+   "boardSize": 10,
+   "initialBoard": [
+    "...5..6..7",
+    "4........7",
+    ".5....7...",
+    "..........",
+    "..........",
+    "..6.......",
+    "..........",
+    ".7....2...",
+    "..........",
+    ".........."
+   ],
+   "pieces": {
+    "seed": 301922,
+    "pool": [
+     "i5",
+     "sq3",
+     "r6",
+     "l4",
+     "t4"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "scoreAtLeast",
+     "value": 200
+    }
+   ],
+   "limits": {
+    "maxMoves": 28
+   },
+   "stars": [
+    24,
+    20
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0039",
+   "index": 39,
+   "boardSize": 10,
+   "initialBoard": [
+    "....6G7...",
+    "....G.....",
+    ".6.G7.....",
+    ".G6..7.1.2",
+    "...1....2.",
+    "7..11..G..",
+    "..1..2....",
+    "G..2......",
+    ".....3....",
+    "22...3.44."
+   ],
+   "pieces": {
+    "seed": 309841,
+    "pool": [
+     "i2",
+     "i3",
+     "i4",
+     "sq2",
+     "c3"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 36
+   },
+   "stars": [
+    33,
+    31
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0040",
+   "index": 40,
+   "boardSize": 10,
+   "initialBoard": [
+    "..6.7.1..2",
+    "........1.",
+    ".......G2.",
+    "........2.",
+    ".1.G...3..",
+    "1....2.334",
+    "...3.3G...",
+    "..2.....4.",
+    "3G...45...",
+    "33..G.5..."
+   ],
+   "pieces": {
+    "seed": 317760,
+    "pool": [
+     "l4",
+     "j4",
+     "t4",
+     "s4",
+     "z4",
+     "sq2",
+     "i3"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    },
+    {
+     "type": "scoreAtLeast",
+     "value": 150
+    }
+   ],
+   "limits": {
+    "maxMoves": 30
+   },
+   "stars": [
+    26,
+    23
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0041",
+   "index": 41,
+   "boardSize": 10,
+   "initialBoard": [
+    ".771.1.22.",
+    ".....1...3",
+    "...22...34",
+    "11...2.3..",
+    "22.3.....5",
+    "2...3.4..5",
+    ".33.44...6",
+    "3.3..45...",
+    "44..55....",
+    "......66.7"
+   ],
+   "pieces": {
+    "seed": 325679,
+    "pool": [
+     "dot",
+     "i2",
+     "i3",
+     "c3"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearLines",
+     "count": 5
+    }
+   ],
+   "limits": {
+    "maxMoves": 22
+   },
+   "stars": [
+    19,
+    17
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0042",
+   "index": 42,
+   "boardSize": 10,
+   "initialBoard": [
+    "1.1..2....",
+    "......G...",
+    "....3.....",
+    "..23.G.4..",
+    ".3....G.G6",
+    "...4G....6",
+    "........6.",
+    "..4.55....",
+    "..G..67...",
+    ".5...G...."
+   ],
+   "pieces": {
+    "seed": 333598,
+    "pool": [
+     "i3",
+     "i4",
+     "sq2",
+     "l4",
+     "j4"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 30
+   },
+   "stars": [
+    26,
+    22
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0043",
+   "index": 43,
+   "boardSize": 10,
+   "initialBoard": [
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    ".........."
+   ],
+   "pieces": {
+    "seed": 341517,
+    "pool": [
+     "dot",
+     "i2",
+     "i3",
+     "i4",
+     "i5",
+     "sq2",
+     "sq3",
+     "c3",
+     "l4",
+     "j4",
+     "t4",
+     "s4",
+     "z4",
+     "c5",
+     "r6"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "scoreAtLeast",
+     "value": 220
+    },
+    {
+     "type": "clearLines",
+     "count": 8
+    }
+   ],
+   "limits": {
+    "maxMoves": 36
+   },
+   "stars": [
+    34,
+    32
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0044",
+   "index": 44,
+   "boardSize": 10,
+   "initialBoard": [
+    "G3.4..5.5G",
+    "3.34..55.6",
+    ".4.5..6.6.",
+    "4445..6667",
+    "..........",
+    "..........",
+    "6667..1112",
+    "..67..11..",
+    "77.1..2.23",
+    "G7.1..2.2G"
+   ],
+   "pieces": {
+    "seed": 349436,
+    "pool": [
+     "sq2",
+     "i2",
+     "dot",
+     "c3"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 24
+   },
+   "stars": [
+    22,
+    20
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0045",
+   "index": 45,
+   "boardSize": 10,
+   "initialBoard": [
+    "....5...6.",
+    "4..5....G.",
+    "G...GG...1",
+    "......7..G",
+    "...7.....G",
+    "G6677.11..",
+    ".........3",
+    "777.......",
+    "1........4",
+    ".....2...G"
+   ],
+   "pieces": {
+    "seed": 357355,
+    "pool": [
+     "i3",
+     "i4",
+     "i5",
+     "sq2",
+     "c3",
+     "t4"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 32
+   },
+   "stars": [
+    26,
+    20
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0046",
+   "index": 46,
+   "boardSize": 10,
+   "initialBoard": [
+    ".5G6.67.7.",
+    "5.......7.",
+    "6.6.7.11..",
+    ".66...1.1.",
+    "77.11....3",
+    "...111.G..",
+    "1.122....4",
+    ".1.2223.3.",
+    ".G...3.4G.",
+    "........4."
+   ],
+   "pieces": {
+    "seed": 365274,
+    "pool": [
+     "dot",
+     "i2",
+     "i3",
+     "c3",
+     "sq2"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    }
+   ],
+   "limits": {
+    "maxMoves": 26
+   },
+   "stars": [
+    21,
+    16
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0047",
+   "index": 47,
+   "boardSize": 10,
+   "initialBoard": [
+    ".6...7.1..",
+    ".........2",
+    "..........",
+    ".7..1.....",
+    "11......3.",
+    "........3.",
+    ".2..3....5",
+    "..........",
+    "..........",
+    "....4.5..."
+   ],
+   "pieces": {
+    "seed": 373193,
+    "pool": [
+     "dot",
+     "i2",
+     "i3",
+     "i4",
+     "i5",
+     "sq2",
+     "sq3",
+     "c3",
+     "l4",
+     "j4",
+     "t4",
+     "s4",
+     "z4",
+     "c5",
+     "r6"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "scoreAtLeast",
+     "value": 230
+    }
+   ],
+   "limits": {
+    "maxMoves": 38
+   },
+   "stars": [
+    36,
+    34
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0048",
+   "index": 48,
+   "boardSize": 10,
+   "initialBoard": [
+    "...GG...2.",
+    ".....1.223",
+    "11....G.3.",
+    ".....2.33.",
+    ".2..3.....",
+    "..........",
+    ".G3...5...",
+    "3.G4...5..",
+    "4..5..G..7",
+    "4........."
+   ],
+   "pieces": {
+    "seed": 381112,
+    "pool": [
+     "dot",
+     "i2",
+     "i3",
+     "i4",
+     "i5",
+     "sq2",
+     "sq3",
+     "c3",
+     "l4",
+     "j4",
+     "t4",
+     "s4",
+     "z4",
+     "c5",
+     "r6"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    },
+    {
+     "type": "clearLines",
+     "count": 5
+    }
+   ],
+   "limits": {
+    "maxMoves": 38
+   },
+   "stars": [
+    30,
+    24
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0049",
+   "index": 49,
+   "boardSize": 10,
+   "initialBoard": [
+    "..1.223...",
+    "..122..334",
+    ".22.3..44.",
+    ".223.....5",
+    "3..G......",
+    "33..4G.5G.",
+    "..4...66..",
+    "..455.6...",
+    ".55.66G.7.",
+    "..G6.67771"
+   ],
+   "pieces": {
+    "seed": 389031,
+    "pool": [
+     "dot",
+     "i2",
+     "i3",
+     "c3",
+     "sq2",
+     "t4"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    },
+    {
+     "type": "scoreAtLeast",
+     "value": 130
+    }
+   ],
+   "limits": {
+    "maxMoves": 30
+   },
+   "stars": [
+    26,
+    22
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  },
+  {
+   "id": "L0050",
+   "index": 50,
+   "boardSize": 10,
+   "initialBoard": [
+    ".2...3G.G.",
+    ".2.G......",
+    "33..GG.5..",
+    "3.3...55..",
+    "G...55....",
+    "G.4......7",
+    "..5...77..",
+    "...666.7..",
+    ".6....1...",
+    ".6G.GG..1."
+   ],
+   "pieces": {
+    "seed": 396950,
+    "pool": [
+     "dot",
+     "i2",
+     "i3",
+     "i4",
+     "i5",
+     "sq2",
+     "sq3",
+     "c3",
+     "l4",
+     "j4",
+     "t4",
+     "s4",
+     "z4",
+     "c5",
+     "r6"
+    ]
+   },
+   "objectives": [
+    {
+     "type": "clearGems"
+    },
+    {
+     "type": "scoreAtLeast",
+     "value": 250
+    }
+   ],
+   "limits": {
+    "maxMoves": 44
+   },
+   "stars": [
+    41,
+    38
+   ],
+   "undoAllowance": 1,
+   "hintAllowance": 1
+  }
+ ]
+}

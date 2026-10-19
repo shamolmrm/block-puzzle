@@ -10,10 +10,16 @@ data object HomeRoute
 
 fun NavGraphBuilder.homeScreen(
     onPlayClassic: () -> Unit,
+    onPlayLevels: () -> Unit,
     onOpenSettings: () -> Unit,
     onHowToPlay: () -> Unit,
 ) {
     composable<HomeRoute> {
-        HomeScreen(onPlayClassic = onPlayClassic, onOpenSettings = onOpenSettings, onHowToPlay = onHowToPlay)
+        HomeScreen(
+            onPlayClassic = onPlayClassic,
+            onPlayLevels = onPlayLevels,
+            onOpenSettings = onOpenSettings,
+            onHowToPlay = onHowToPlay,
+        )
     }
 }

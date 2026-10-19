@@ -21,6 +21,22 @@ class ShapeCatalog(val entries: List<CatalogEntry>) {
 
     operator fun get(id: String): Shape? = byId[id]
 
+    /**
+     * A catalogue restricted to [ids], keeping each entry's weight. An id is either an exact shape id
+     * (`l4_2`, one rotation) or a base id (`l4`, all of its rotations). Unknown ids are an error.
+     */
+    fun subset(ids: Collection<String>): ShapeCatalog {
+        val picked = ids.flatMap { id ->
+            val matches = entries.filter { it.shape.id == id || it.shape.id.substringBeforeLast('_') == id }
+            require(matches.isNotEmpty()) { "Unknown shape id '$id'" }
+            matches
+        }
+        return ShapeCatalog(picked.distinctBy { it.shape.id })
+    }
+
+    /** Whether [id] names a shape or a base shape in this catalogue. */
+    fun knows(id: String): Boolean = entries.any { it.shape.id == id || it.shape.id.substringBeforeLast('_') == id }
+
     companion object {
         /**
          * The Classic catalogue. Each base pattern expands into its distinct 90° rotations, with ids
