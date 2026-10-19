@@ -58,11 +58,21 @@ android {
 
 // The Play upload bundle must carry real AdMob ids; otherwise players would only ever see test
 // ads (and the app would earn nothing). Local release/benchmark APKs are unaffected.
+// Deliberate opt-out for internal-testing uploads: -Ppbb.allowTestAdsBundle=true (test ads earn nothing).
 val admobConfigured = rootProject.file("admob.properties").exists()
-tasks.matching { it.name == "bundleRelease" }.configureEach {
+val allowTestAdsBundle = providers.gradleProperty("pbb.allowTestAdsBundle").orNull == "true"
+// Gate the packaging task itself: checking only `bundleRelease` let `packageReleaseBundle` write the .aab first.
+tasks.matching { it.name == "packageReleaseBundle" || it.name == "bundleRelease" }.configureEach {
+    // Locals only: the action must not capture the build script (configuration cache).
+    val configured = admobConfigured
+    val allowTestAds = allowTestAdsBundle
     doFirst {
-        check(admobConfigured) {
-            "admob.properties is missing: add your real AdMob app id and ad unit ids before building the Play bundle (docs/MONETIZATION.md)."
+        if (!configured && allowTestAds) {
+            println("WARNING: building the Play bundle with Google's TEST ads (pbb.allowTestAdsBundle). Internal testing only.")
+        }
+        check(configured || allowTestAds) {
+            "admob.properties is missing: add your real AdMob app id and ad unit ids before building the Play bundle " +
+                "(docs/MONETIZATION.md), or pass -Ppbb.allowTestAdsBundle=true for an internal-testing bundle with test ads."
         }
     }
 }
