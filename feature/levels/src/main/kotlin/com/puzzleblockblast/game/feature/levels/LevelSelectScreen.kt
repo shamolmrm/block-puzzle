@@ -111,7 +111,7 @@ fun LevelSelectScreen(
 private val StarGold = Color(0xFFFFC145)
 
 @Composable
-private fun LevelTileButton(tile: LevelTile, isNext: Boolean, onClick: () -> Unit) {
+internal fun LevelTileButton(tile: LevelTile, isNext: Boolean, onClick: () -> Unit) {
     val colors = PbbTheme.boardColors
     val description = when {
         !tile.unlocked -> stringResource(R.string.levels_tile_locked, tile.index)

@@ -1,6 +1,7 @@
 package com.puzzleblockblast.game.feature.game.level
 
 import android.app.Activity
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,7 +21,10 @@ import com.puzzleblockblast.game.core.engine.board.GridPoint
 import com.puzzleblockblast.game.core.engine.classic.HintResult
 import com.puzzleblockblast.game.core.engine.classic.Move
 import com.puzzleblockblast.game.core.engine.classic.MoveOutcome
+import com.puzzleblockblast.game.core.data.level.EventRepository
+import com.puzzleblockblast.game.core.engine.level.ActiveEvent
 import com.puzzleblockblast.game.core.engine.level.DailyChallenge
+import com.puzzleblockblast.game.core.engine.level.EventSchedule
 import com.puzzleblockblast.game.core.engine.level.LevelDefinition
 import com.puzzleblockblast.game.core.engine.level.LevelGame
 import com.puzzleblockblast.game.core.engine.level.LevelMoveResult
@@ -29,6 +33,7 @@ import com.puzzleblockblast.game.core.engine.level.LevelState
 import com.puzzleblockblast.game.core.engine.level.ObjectiveProgress
 import com.puzzleblockblast.game.core.model.GameMode
 import com.puzzleblockblast.game.core.monetization.AdsController
+import com.puzzleblockblast.game.core.monetization.ads.BannerAd
 import com.puzzleblockblast.game.feature.game.GameMessage
 import com.puzzleblockblast.game.feature.game.GameUiState
 import com.puzzleblockblast.game.feature.game.soundFor
@@ -68,6 +73,7 @@ data class LevelUiState(
 class LevelGameViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val levels: LevelRepository,
+    private val events: EventRepository,
     private val progress: LevelProgressRepository,
     private val progression: ProgressionRepository,
     private val analytics: AnalyticsTracker,
@@ -96,8 +102,15 @@ class LevelGameViewModel @Inject constructor(
             ads.rewardedAvailable.collect { ready -> _uiState.update { it.copy(game = it.game.copy(rewardedReady = ready)) } }
         }
         viewModelScope.launch {
+            val eventRun = EventSchedule.parseRunLevelId(levelId)
             val (level, next) = if (dailyDay != null) {
                 DailyChallenge.levelFor(dailyDay) to null
+            } else if (eventRun != null) {
+                // Event level for one weekly run: `E01L03@2915`. "Next" stays within the same run.
+                val (contentId, instance) = eventRun
+                val eventLevels = events.events().firstOrNull { e -> e.levels.any { it.id == contentId } }?.levels.orEmpty()
+                val index = eventLevels.indexOfFirst { it.id == contentId }
+                eventLevels.getOrNull(index) to eventLevels.getOrNull(index + 1)?.let { "${it.id}${ActiveEvent.RUN_SEPARATOR}$instance" }
             } else {
                 val all = levels.levels()
                 val index = all.indexOfFirst { it.id == levelId }
@@ -193,6 +206,11 @@ class LevelGameViewModel @Inject constructor(
 
     private var adInProgress = false
 
+    /** Banner above the game (consented, not removed); the screen creates it at its own width. */
+    val bannersAllowed: StateFlow<Boolean> get() = ads.bannersAllowed
+
+    fun createBanner(context: Context, widthDp: Int): BannerAd? = ads.createBanner(context, widthDp)
+
     /** A natural break (leaving a finished level): an interstitial may show, then [then] runs. */
     fun onBreak(activity: Activity, then: () -> Unit) {
         viewModelScope.launch {
@@ -270,7 +288,11 @@ class LevelGameViewModel @Inject constructor(
     }
 
     private fun logLevel(name: String, vararg extra: Pair<String, Any>) {
-        val mode = if (dailyDay != null) GameMode.DAILY else GameMode.LEVEL
+        val mode = when {
+            dailyDay != null -> GameMode.DAILY
+            EventSchedule.parseRunLevelId(levelId) != null -> GameMode.EVENT
+            else -> GameMode.LEVEL
+        }
         analytics.log(
             AnalyticsEvent(
                 name,

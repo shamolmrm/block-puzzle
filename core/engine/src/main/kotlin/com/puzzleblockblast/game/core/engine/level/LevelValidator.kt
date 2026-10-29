@@ -9,8 +9,8 @@ import com.puzzleblockblast.game.core.engine.shape.ShapeCatalog
  * empty list means the level is safe to load. Winnability is checked separately by [LevelBot].
  */
 object LevelValidator {
-    /** Pack levels `L0001`; generated dailies `D` + epoch day. */
-    private val ID_PATTERN = Regex("L\\d{4}|D-?\\d{1,9}")
+    /** Pack levels `L0001`; generated dailies `D` + epoch day; event levels `E01L03`. */
+    private val ID_PATTERN = Regex("L\\d{4}|D-?\\d{1,9}|E\\d{2}L\\d{2}")
     const val MIN_BOARD = 8
     const val MAX_MOVES = 200
     const val MAX_ALLOWANCE = 3

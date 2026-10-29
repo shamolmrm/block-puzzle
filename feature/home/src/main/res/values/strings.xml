@@ -1,5 +1,5 @@
 <resources>
-    <string name="home_title">Puzzle Block Blast</string>
+    <string name="home_title">BlockFit Puzzle</string>
     <string name="home_subtitle">Fit the blocks. Clear the lines.</string>
     <string name="home_classic">Classic</string>
     <string name="home_levels">Levels</string>
@@ -16,4 +16,8 @@
     <string name="home_streak">🔥 %1$d</string>
     <string name="home_profile_description">Player level %1$d, %2$d of %3$d XP to the next level, daily streak %4$d. Opens stats.</string>
     <string name="home_coming_soon">Coming soon</string>
+    <plurals name="home_event_days_left">
+        <item quantity="one">%1$d day left</item>
+        <item quantity="other">%1$d days left</item>
+    </plurals>
 </resources>

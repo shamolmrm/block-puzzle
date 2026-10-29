@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- WorkManager (pulled in by the ads SDK) declares a foreground service the game never starts.
+         Dropping it keeps Play's foreground-service declaration out of the release. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" tools:node="remove" />
 
     <application
         android:name=".PuzzleBlockBlastApp"
@@ -21,6 +26,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            tools:ignore="MissingClass"
+            tools:node="remove" />
     </application>
 
 </manifest>

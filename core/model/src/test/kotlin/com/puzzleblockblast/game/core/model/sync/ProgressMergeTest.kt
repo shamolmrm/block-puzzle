@@ -89,6 +89,13 @@ class ProgressMergeTest {
         assertThat(clean.counters).containsExactly("tablet-0001", mapOf(StatKeys.LINES_CLEARED to 3L))
     }
 
+    @Test
+    fun `only pack levels sync, not weekly event runs`() {
+        assertThat(ProgressMerge.isSyncedLevelId("L0042")).isTrue()
+        assertThat(ProgressMerge.isSyncedLevelId("E01L03@2915")).isFalse()
+        assertThat(ProgressMerge.isSyncedLevelId("E01L03")).isFalse()
+    }
+
     private fun randomProgress(random: Random) = CloudProgress(
         levels = (1..random.nextInt(4)).associate { "L000${random.nextInt(1, 6)}" to ResultRecord(random.nextInt(4), random.nextInt(200)) },
         daily = (1..random.nextInt(3)).associate { random.nextLong(20_740, 20_750) to ResultRecord(random.nextInt(4), random.nextInt(200)) },

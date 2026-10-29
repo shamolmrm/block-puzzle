@@ -12,14 +12,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
@@ -100,6 +106,11 @@ fun GameRoute(
         // Leaving a finished game is a natural break: an interstitial may show (paced, consented).
         onPlayAgain = { if (activity != null) viewModel.onBreak(activity, viewModel::onRestart) else viewModel.onRestart() },
         onGameOverHome = { if (activity != null) viewModel.onBreak(activity, onBack) else onBack() },
+        banner = {
+            val allowed by viewModel.bannersAllowed.collectAsStateWithLifecycle()
+            // Pause and game-over cards only cover the game area above the banner, so it stays visible.
+            if (allowed) GameBanner(visible = true, create = viewModel::createBanner)
+        },
     )
 }
 
@@ -126,6 +137,8 @@ fun GameScreen(
     /** Game-over card actions; default to the plain restart / home actions. */
     onPlayAgain: () -> Unit = onRestart,
     onGameOverHome: () -> Unit = onHome,
+    /** Ad banner pinned below the game controls (none in the tutorial). */
+    banner: (@Composable () -> Unit)? = null,
 ) {
     PbbBackground(modifier = modifier) {
         val game = state.game
@@ -204,163 +217,175 @@ fun GameScreen(
             }
         }
 
-        BoxWithConstraints(
-            modifier = Modifier.fillMaxSize().onGloballyPositioned { rootOrigin = it.positionInRoot() },
-        ) {
-            // Landscape phones and tablets: board on the left, everything else in a column beside it.
-            val landscape = maxWidth > maxHeight * 1.15f
-            // Board is as large as fits beside the HUD and tray, capped for tablets.
-            val boardSize: Dp = if (landscape) {
-                minOf(maxHeight - 32.dp, maxWidth * 0.55f, 560.dp).coerceAtLeast(200.dp)
-            } else {
-                minOf(maxWidth - 24.dp, maxHeight - 330.dp, 480.dp).coerceAtLeast(220.dp)
-            }
-
-            val headerContent: @Composable () -> Unit = {
-                if (header != null) {
-                    header()
+        // The banner sits at the very bottom, below Undo / Hint and clear of the piece tray (drags go
+        // up, toward the board). It takes the navigation-bar inset, so the game above doesn't pad for it again.
+        val bottomInset = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)
+        Column(Modifier.fillMaxSize()) {
+            BoxWithConstraints(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .then(if (banner != null) Modifier.consumeWindowInsets(bottomInset) else Modifier)
+                    .onGloballyPositioned { rootOrigin = it.positionInRoot() },
+            ) {
+                // Landscape phones and tablets: board on the left, everything else in a column beside it.
+                val landscape = maxWidth > maxHeight * 1.15f
+                // Board is as large as fits beside the HUD and tray, capped for tablets.
+                val boardSize: Dp = if (landscape) {
+                    minOf(maxHeight - 32.dp, maxWidth * 0.55f, 560.dp).coerceAtLeast(200.dp)
                 } else {
-                    ScoreBar(
-                        score = game.score,
-                        best = state.displayBest,
-                        combo = game.combo,
-                        pauseEnabled = state.isPlaying,
-                        animate = !reducedMotion,
-                        onPause = onPause,
+                    minOf(maxWidth - 24.dp, maxHeight - 330.dp, 480.dp).coerceAtLeast(220.dp)
+                }
+
+                val headerContent: @Composable () -> Unit = {
+                    if (header != null) {
+                        header()
+                    } else {
+                        ScoreBar(
+                            score = game.score,
+                            best = state.displayBest,
+                            combo = game.combo,
+                            pauseEnabled = state.isPlaying,
+                            animate = !reducedMotion,
+                            onPause = onPause,
+                            modifier = Modifier.widthIn(max = 480.dp),
+                        )
+                    }
+                }
+                val boardContent: @Composable () -> Unit = {
+                    Box(contentAlignment = Alignment.Center) {
+                        BoardCanvas(
+                            board = game.board,
+                            preview = preview,
+                            hintCells = hintCells,
+                            burst = burst,
+                            burstProgress = feedbackProgress,
+                            onGeometry = { geometry = it },
+                            modifier = Modifier.width(boardSize),
+                        )
+                        if (outcome != null && animating) MovePopup(outcome, feedbackProgress)
+                    }
+                }
+                val trayContent: @Composable () -> Unit = {
+                    PieceTray(
+                        tray = game.tray,
+                        slotsThatFit = state.slotsThatFit,
+                        boardCellSize = geometry?.cellSize ?: 0f,
+                        draggingSlot = dragSlot,
+                        hintSlot = state.hint?.slot,
+                        enabled = state.isPlaying,
+                        onDragStart = { slot, p ->
+                            if (hapticsOn) haptics.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+                            dragSlot = slot
+                            pointer = p
+                        },
+                        onDrag = { delta -> pointer += delta },
+                        onDragEnd = {
+                            val drop = preview
+                            dragSlot = null
+                            if (drop != null) {
+                                dropColor = colors.tile(drop.tile)
+                                onPlace(drop.slot, drop.origin)
+                            }
+                        },
+                        onDragCancel = { dragSlot = null },
                         modifier = Modifier.widthIn(max = 480.dp),
                     )
                 }
-            }
-            val boardContent: @Composable () -> Unit = {
-                Box(contentAlignment = Alignment.Center) {
-                    BoardCanvas(
-                        board = game.board,
-                        preview = preview,
-                        hintCells = hintCells,
-                        burst = burst,
-                        burstProgress = feedbackProgress,
-                        onGeometry = { geometry = it },
-                        modifier = Modifier.width(boardSize),
-                    )
-                    if (outcome != null && animating) MovePopup(outcome, feedbackProgress)
-                }
-            }
-            val trayContent: @Composable () -> Unit = {
-                PieceTray(
-                    tray = game.tray,
-                    slotsThatFit = state.slotsThatFit,
-                    boardCellSize = geometry?.cellSize ?: 0f,
-                    draggingSlot = dragSlot,
-                    hintSlot = state.hint?.slot,
-                    enabled = state.isPlaying,
-                    onDragStart = { slot, p ->
-                        if (hapticsOn) haptics.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
-                        dragSlot = slot
-                        pointer = p
-                    },
-                    onDrag = { delta -> pointer += delta },
-                    onDragEnd = {
-                        val drop = preview
-                        dragSlot = null
-                        if (drop != null) {
-                            dropColor = colors.tile(drop.tile)
-                            onPlace(drop.slot, drop.origin)
-                        }
-                    },
-                    onDragCancel = { dragSlot = null },
-                    modifier = Modifier.widthIn(max = 480.dp),
-                )
-            }
-            val controlsContent: @Composable () -> Unit = {
-                if (showControls) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        // When the free ones are used up, the same button offers an optional rewarded ad.
-                        if (state.rewardedUndoOffer) {
-                            FilledTonalButton(onClick = onWatchAdForUndo, modifier = Modifier.heightIn(min = 48.dp)) {
-                                Text(stringResource(R.string.game_undo_ad))
+                val controlsContent: @Composable () -> Unit = {
+                    if (showControls) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            // When the free ones are used up, the same button offers an optional rewarded ad.
+                            if (state.rewardedUndoOffer) {
+                                FilledTonalButton(onClick = onWatchAdForUndo, modifier = Modifier.heightIn(min = 48.dp)) {
+                                    Text(stringResource(R.string.game_undo_ad))
+                                }
+                            } else {
+                                FilledTonalButton(onClick = onUndo, enabled = state.canUndo, modifier = Modifier.heightIn(min = 48.dp)) {
+                                    Text(stringResource(R.string.game_undo, game.undosRemaining))
+                                }
                             }
-                        } else {
-                            FilledTonalButton(onClick = onUndo, enabled = state.canUndo, modifier = Modifier.heightIn(min = 48.dp)) {
-                                Text(stringResource(R.string.game_undo, game.undosRemaining))
-                            }
-                        }
-                        if (state.rewardedHintOffer) {
-                            FilledTonalButton(onClick = onWatchAdForHint, modifier = Modifier.heightIn(min = 48.dp)) {
-                                Text(stringResource(R.string.game_hint_ad))
-                            }
-                        } else {
-                            FilledTonalButton(onClick = onHint, enabled = state.canHint, modifier = Modifier.heightIn(min = 48.dp)) {
-                                Text(stringResource(R.string.game_hint, game.hintsRemaining))
+                            if (state.rewardedHintOffer) {
+                                FilledTonalButton(onClick = onWatchAdForHint, modifier = Modifier.heightIn(min = 48.dp)) {
+                                    Text(stringResource(R.string.game_hint_ad))
+                                }
+                            } else {
+                                FilledTonalButton(onClick = onHint, enabled = state.canHint, modifier = Modifier.heightIn(min = 48.dp)) {
+                                    Text(stringResource(R.string.game_hint, game.hintsRemaining))
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            val padding = Modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = 12.dp, vertical = 16.dp)
-            if (landscape) {
-                Row(
-                    modifier = padding,
-                    horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    boardContent()
+                val padding = Modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = 12.dp, vertical = 16.dp)
+                if (landscape) {
+                    Row(
+                        modifier = padding,
+                        horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        boardContent()
+                        Column(
+                            modifier = Modifier.weight(1f, fill = false).widthIn(max = 480.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            headerContent()
+                            trayContent()
+                            controlsContent()
+                        }
+                    }
+                } else {
                     Column(
-                        modifier = Modifier.weight(1f, fill = false).widthIn(max = 480.dp),
+                        modifier = padding,
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterVertically),
                     ) {
                         headerContent()
+                        boardContent()
                         trayContent()
                         controlsContent()
                     }
                 }
-            } else {
-                Column(
-                    modifier = padding,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterVertically),
-                ) {
-                    headerContent()
-                    boardContent()
-                    trayContent()
-                    controlsContent()
-                }
-            }
 
-            // The dragged piece floats above everything at board scale, with a soft drop shadow.
-            if (dragPiece != null && boardGeometry != null) {
-                Canvas(Modifier.fillMaxSize()) {
-                    // Reading the pointer here (draw phase) means a move only redraws this layer.
-                    val topLeft = DragGeometry.pieceTopLeft(pointer, dragPiece.shape, boardGeometry.cellSize, liftPx)
-                    val origin = topLeft - rootOrigin
-                    val shadow = boardGeometry.cellSize * 0.18f
-                    translate(shadow, shadow) {
-                        dragPiece.shape.cells.forEach { p ->
-                            drawRoundRect(
-                                color = Color.Black.copy(alpha = 0.28f),
-                                topLeft = origin + Offset(p.col * boardGeometry.cellSize, p.row * boardGeometry.cellSize),
-                                size = Size(boardGeometry.cellSize, boardGeometry.cellSize),
-                                cornerRadius = CornerRadius(boardGeometry.cellSize * 0.2f),
-                            )
+                // The dragged piece floats above everything at board scale, with a soft drop shadow.
+                if (dragPiece != null && boardGeometry != null) {
+                    Canvas(Modifier.fillMaxSize()) {
+                        // Reading the pointer here (draw phase) means a move only redraws this layer.
+                        val topLeft = DragGeometry.pieceTopLeft(pointer, dragPiece.shape, boardGeometry.cellSize, liftPx)
+                        val origin = topLeft - rootOrigin
+                        val shadow = boardGeometry.cellSize * 0.18f
+                        translate(shadow, shadow) {
+                            dragPiece.shape.cells.forEach { p ->
+                                drawRoundRect(
+                                    color = Color.Black.copy(alpha = 0.28f),
+                                    topLeft = origin + Offset(p.col * boardGeometry.cellSize, p.row * boardGeometry.cellSize),
+                                    size = Size(boardGeometry.cellSize, boardGeometry.cellSize),
+                                    cornerRadius = CornerRadius(boardGeometry.cellSize * 0.2f),
+                                )
+                            }
                         }
+                        drawPiece(dragPiece.shape.cells, colors.tile(dragPiece.tile), boardGeometry.cellSize, origin)
                     }
-                    drawPiece(dragPiece.shape.cells, colors.tile(dragPiece.tile), boardGeometry.cellSize, origin)
+                }
+
+                SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter).safeDrawingPadding())
+
+                when {
+                    game.isGameOver && showGameOver -> GameOverOverlay(
+                        score = game.score,
+                        best = state.displayBest,
+                        isNewBest = state.isNewBest,
+                        reward = state.reward,
+                        onPlayAgain = onPlayAgain,
+                        onHome = onGameOverHome,
+                    )
+                    state.isPaused -> PauseOverlay(onResume = onResume, onRestart = onRestart, onHome = onHome)
                 }
             }
-
-            SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter).safeDrawingPadding())
-
-            when {
-                game.isGameOver && showGameOver -> GameOverOverlay(
-                    score = game.score,
-                    best = state.displayBest,
-                    isNewBest = state.isNewBest,
-                    reward = state.reward,
-                    onPlayAgain = onPlayAgain,
-                    onHome = onGameOverHome,
-                )
-                state.isPaused -> PauseOverlay(onResume = onResume, onRestart = onRestart, onHome = onHome)
+            if (banner != null) {
+                Box(Modifier.fillMaxWidth().windowInsetsPadding(bottomInset)) { banner() }
             }
         }
     }

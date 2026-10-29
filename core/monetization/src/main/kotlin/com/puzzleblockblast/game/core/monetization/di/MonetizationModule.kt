@@ -5,7 +5,7 @@ import com.puzzleblockblast.game.core.monetization.ads.AdsGateway
 import com.puzzleblockblast.game.core.monetization.billing.BillingGateway
 import com.puzzleblockblast.game.core.monetization.billing.CachedEntitlements
 import com.puzzleblockblast.game.core.monetization.billing.Entitlements
-import com.puzzleblockblast.game.core.monetization.billing.PlayBillingGateway
+import com.puzzleblockblast.game.core.monetization.billing.NoBillingGateway
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -19,7 +19,7 @@ internal abstract class MonetizationModule {
     abstract fun bindAds(impl: AdMobGateway): AdsGateway
 
     @Binds
-    abstract fun bindBilling(impl: PlayBillingGateway): BillingGateway
+    abstract fun bindBilling(impl: NoBillingGateway): BillingGateway
 
     @Binds
     abstract fun bindEntitlements(impl: CachedEntitlements): Entitlements

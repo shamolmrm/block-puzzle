@@ -32,6 +32,7 @@ class HomeLayoutTest {
                         onPlayClassic = {},
                         onPlayLevels = {},
                         onPlayDaily = {},
+                        onPlayEvents = {},
                         onOpenStats = {},
                         onOpenSettings = {},
                         onHowToPlay = {},

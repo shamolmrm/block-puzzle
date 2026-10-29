@@ -29,7 +29,6 @@ firebaseCrashlyticsGradle = "3.0.8"
 # Monetization (Phase 7): test ad units only until release approval (docs/MONETIZATION.md).
 playServicesAds = "25.5.0"
 ump = "3.2.0"
-playBilling = "8.3.0"
 # Release performance (Phase 8): Baseline Profiles + startup macrobenchmark.
 baselineProfile = "1.5.0"
 profileInstaller = "1.4.1"
@@ -71,7 +70,6 @@ firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "fireb
 firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug" }
 play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
 ump = { group = "com.google.android.ump", name = "user-messaging-platform", version.ref = "ump" }
-play-billing = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "playBilling" }
 firebase-functions = { group = "com.google.firebase", name = "firebase-functions" }
 # Pinned so the app and its instrumentation tests agree (profileinstaller brings 1.1.0, androidx.test needs 1.2.0).
 androidx-concurrent-futures = { group = "androidx.concurrent", name = "concurrent-futures", version = "1.2.0" }

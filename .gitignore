@@ -1,12 +1,8 @@
 *.iml
 .gradle
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+# IDE state is per machine
+/.idea/
 .DS_Store
 build/
 /captures
@@ -34,3 +30,46 @@ firebase/.firebase/
 # Ad configuration (real ids, test device ids): never committed
 admob.properties
 ads-debug.properties
+
+# Python tooling (tools/levels)
+__pycache__/
+
+# --- added for GitHub backup: build output, dependencies, secrets ---
+node_modules/
+build/
+dist/
+dist-package/
+.dart_tool/
+.gradle/
+.next/
+.venv/
+venv/
+__pycache__/
+.idea/
+.cxx/
+.kotlin/
+Pods/
+coverage/
+.firebase/
+.claude/
+*.exe
+*.asar
+*.aab
+*.apk
+*.log
+local.properties
+.env
+.env.*
+!.env.example
+!.env.*.example
+!.env.example.*
+*.jks
+*.keystore
+key.properties
+keys.json
+admob.properties
+*service-account*.json
+*service_account*.json
+*firebase-adminsdk*.json
+*.pem
+*.p12

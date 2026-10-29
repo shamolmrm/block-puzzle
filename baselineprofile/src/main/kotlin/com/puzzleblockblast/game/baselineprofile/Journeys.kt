@@ -4,7 +4,7 @@ import androidx.benchmark.macro.MacrobenchmarkScope
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 
-const val PACKAGE = "com.puzzleblockblast.game"
+const val PACKAGE = "com.bahalabs.blockfit"
 private const val WAIT_MS = 5_000L
 
 /** Cold start to the Home screen. */

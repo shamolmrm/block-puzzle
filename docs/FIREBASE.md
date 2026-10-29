@@ -81,7 +81,7 @@ All keys are clamped and fall back to defaults. Fetched values take effect on th
 ## Turning Firebase on (you, in the Firebase console)
 
 1. **Create a project** at console.firebase.google.com. The free Spark plan covers this.
-2. **Add two Android apps:** `com.puzzleblockblast.game` (release) and `com.puzzleblockblast.game.debug` (debug builds).
+2. **Add one Android app:** `com.bahalabs.blockfit` (debug and release builds share this id).
 3. **Get the config file:** download `google-services.json`, which covers both apps, into `app/`. It's in `.gitignore`; never commit it.
 4. **Enable the services:**
    - Authentication → Anonymous sign-in.

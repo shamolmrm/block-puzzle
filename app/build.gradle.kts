@@ -26,9 +26,9 @@ android {
     namespace = "com.puzzleblockblast.game"
 
     defaultConfig {
-        applicationId = "com.puzzleblockblast.game"
-        versionCode = 3
-        versionName = "1.0.0"
+        applicationId = "com.bahalabs.blockfit"
+        versionCode = 5
+        versionName = "1.0.1"
     }
 
     signingConfigs {
@@ -43,9 +43,6 @@ android {
     }
 
     buildTypes {
-        debug {
-            applicationIdSuffix = ".debug"
-        }
         release {
             // R8: code shrinking, optimization and resource shrinking (rules in proguard-rules.pro).
             isMinifyEnabled = true

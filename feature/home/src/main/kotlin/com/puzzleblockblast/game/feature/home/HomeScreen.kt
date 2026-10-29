@@ -38,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -57,6 +58,7 @@ fun HomeScreen(
     onPlayClassic: () -> Unit,
     onPlayLevels: () -> Unit,
     onPlayDaily: () -> Unit,
+    onPlayEvents: () -> Unit,
     onOpenStats: () -> Unit,
     onOpenSettings: () -> Unit,
     onHowToPlay: () -> Unit,
@@ -99,8 +101,16 @@ fun HomeScreen(
                         else -> stringResource(R.string.home_daily_new)
                     },
                 )
-                // Events come later; visible but disabled so the menu layout is final.
-                PbbMenuButton(stringResource(R.string.home_events), {}, enabled = false, supportingText = comingSoon)
+                PbbMenuButton(
+                    stringResource(R.string.home_events),
+                    onPlayEvents,
+                    enabled = profile?.eventDaysLeft != null,
+                    supportingText = when {
+                        profile == null -> null
+                        profile.eventDaysLeft == null -> comingSoon
+                        else -> pluralStringResource(R.plurals.home_event_days_left, profile.eventDaysLeft, profile.eventDaysLeft)
+                    },
+                )
                 Row(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -196,6 +206,7 @@ private fun HomeScreenPreview() {
             onPlayClassic = {},
             onPlayLevels = {},
             onPlayDaily = {},
+            onPlayEvents = {},
             onOpenStats = {},
             onOpenSettings = {},
             onHowToPlay = {},

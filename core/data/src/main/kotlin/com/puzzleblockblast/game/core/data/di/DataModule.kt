@@ -9,7 +9,9 @@ import com.puzzleblockblast.game.core.data.classic.ClassicDataStore
 import com.puzzleblockblast.game.core.data.classic.ClassicGameRepository
 import com.puzzleblockblast.game.core.data.classic.DataStoreClassicGameRepository
 import androidx.room.Room
+import com.puzzleblockblast.game.core.data.level.BundledEventRepository
 import com.puzzleblockblast.game.core.data.level.BundledLevelRepository
+import com.puzzleblockblast.game.core.data.level.EventRepository
 import com.puzzleblockblast.game.core.data.level.LevelProgressDao
 import com.puzzleblockblast.game.core.data.level.LevelProgressRepository
 import com.puzzleblockblast.game.core.data.level.LevelRepository
@@ -54,6 +56,9 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindLevelRepository(impl: BundledLevelRepository): LevelRepository
+
+    @Binds
+    abstract fun bindEventRepository(impl: BundledEventRepository): EventRepository
 
     @Binds
     abstract fun bindLevelProgressRepository(impl: RoomLevelProgressRepository): LevelProgressRepository

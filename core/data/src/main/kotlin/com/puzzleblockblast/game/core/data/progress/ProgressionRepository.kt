@@ -184,12 +184,15 @@ internal fun buildSnapshot(
         bestClassicScore = values[StatKeys.BEST_CLASSIC_SCORE] ?: 0,
         linesCleared = values[StatKeys.LINES_CLEARED] ?: 0,
         bestCombo = values[StatKeys.BEST_COMBO] ?: 0,
-        levelsCompleted = levelRows.count { it.isCompleted },
+        // Pack levels only: event runs (E01L03@2915) also live in level_progress but aren't "levels".
+        levelsCompleted = levelRows.count { it.isCompleted && PACK_LEVEL.matches(it.levelId) },
         levelCount = levelCount,
-        totalStars = levelRows.sumOf { it.stars },
+        totalStars = levelRows.filter { PACK_LEVEL.matches(it.levelId) }.sumOf { it.stars },
         dailyCompleted = completedDays.size,
         currentStreak = if (today == Long.MIN_VALUE) 0 else Streaks.current(completedDays, today),
         bestStreak = Streaks.best(completedDays),
         unlockedAchievements = unlocks.associate { it.id to it.unlockedAtMillis },
     )
 }
+
+private val PACK_LEVEL = Regex("L\\d{4}")

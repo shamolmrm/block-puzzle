@@ -1,4 +1,4 @@
-# Puzzle Block Blast
+# BlockFit Puzzle
 
 An original casual block-puzzle game for Android: Kotlin, Jetpack Compose, ViewModel + StateFlow, Hilt and DataStore.
 It is built to play offline first. Firebase and ads are added in later phases, behind interfaces.
@@ -22,7 +22,7 @@ It is built to play offline first. Firebase and ads are added in later phases, b
 > line clears, combos, undo (1 per game), hints (3 per game), pause/restart, best score and automatic save/resume.
 > A guided tutorial runs on first launch (replay via "How to play"). Sound effects are synthesized in code
 > (`:core:audio`, no audio assets); haptics and "Reduce motion" follow Settings. Music is not implemented yet.
-> Events are shown as "Coming soon". See [`docs/PLAN.md`](docs/PLAN.md) for the roadmap.
+> Weekly Events rotate a bundled set of themed levels every Monday (offline; progress per run, not cloud-synced). See [`docs/PLAN.md`](docs/PLAN.md) for the roadmap.
 
 ## Requirements
 
@@ -50,7 +50,7 @@ sdkmanager "platforms;android-37.0"
 ./gradlew connectedDebugAndroidTest   # Compose UI tests; needs an emulator or device
 ```
 
-Use `gradlew.bat` on Windows. The debug build installs as `com.puzzleblockblast.game.debug`, so it can sit alongside a release build.
+Use `gradlew.bat` on Windows. Debug and release builds share the id `com.bahalabs.blockfit`, so installing one replaces the other (uninstall first if the signatures differ).
 
 ## Project layout
 

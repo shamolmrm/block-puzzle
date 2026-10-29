@@ -21,7 +21,7 @@ class HomeScreenTest {
     val compose = createComposeRule()
 
     @Test
-    fun playableModesAreEnabledAndEventsAreComingSoon() {
+    fun allModesAreEnabledWithTheirStatus() {
         val clicks = mutableListOf<String>()
         compose.setContent {
             PbbTheme {
@@ -29,10 +29,11 @@ class HomeScreenTest {
                     onPlayClassic = { clicks += "classic" },
                     onPlayLevels = { clicks += "levels" },
                     onPlayDaily = { clicks += "daily" },
+                    onPlayEvents = { clicks += "events" },
                     onOpenStats = { clicks += "stats" },
                     onOpenSettings = {},
                     onHowToPlay = {},
-                    profile = HomeProfile(PlayerLevel(3, 40, 200), dailyDoneToday = true, streak = 2),
+                    profile = HomeProfile(PlayerLevel(3, 40, 200), dailyDoneToday = true, streak = 2, eventDaysLeft = 4),
                 )
             }
         }
@@ -41,8 +42,9 @@ class HomeScreenTest {
         compose.onNodeWithText("Levels").assertIsEnabled().performClick()
         compose.onNodeWithText("Daily Challenge", substring = true).assertIsEnabled().performClick()
         compose.onNodeWithText("✓ Done", substring = true).assertIsDisplayed()
-        compose.onNodeWithText("Events", substring = true).assertIsNotEnabled()
+        compose.onNodeWithText("4 days left").assertIsDisplayed()
+        compose.onNodeWithText("Events", substring = true).assertIsEnabled().performClick()
         compose.onNodeWithText("Stats").performClick()
-        assertEquals(listOf("classic", "levels", "daily", "stats"), clicks)
+        assertEquals(listOf("classic", "levels", "daily", "events", "stats"), clicks)
     }
 }

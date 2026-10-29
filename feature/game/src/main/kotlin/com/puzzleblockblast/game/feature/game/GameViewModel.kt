@@ -1,6 +1,7 @@
 package com.puzzleblockblast.game.feature.game
 
 import android.app.Activity
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.puzzleblockblast.game.core.analytics.AnalyticsEvent
@@ -24,6 +25,7 @@ import com.puzzleblockblast.game.core.engine.classic.MoveResult
 import com.puzzleblockblast.game.core.model.GameMode
 import com.puzzleblockblast.game.core.model.UserSettings
 import com.puzzleblockblast.game.core.monetization.AdsController
+import com.puzzleblockblast.game.core.monetization.ads.BannerAd
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -267,6 +269,11 @@ class GameViewModel @Inject constructor(
     }
 
     private var adInProgress = false
+
+    /** Banner above the game (consented, not removed); the screen creates it at its own width. */
+    val bannersAllowed: StateFlow<Boolean> get() = ads.bannersAllowed
+
+    fun createBanner(context: Context, widthDp: Int): BannerAd? = ads.createBanner(context, widthDp)
 
     /** A natural break (leaving a finished game): an interstitial may show, then [then] runs. */
     fun onBreak(activity: Activity, then: () -> Unit) {

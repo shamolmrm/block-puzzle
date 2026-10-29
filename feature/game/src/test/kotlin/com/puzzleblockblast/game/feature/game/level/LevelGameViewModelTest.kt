@@ -13,6 +13,7 @@ import com.puzzleblockblast.game.core.engine.level.Objective
 import com.puzzleblockblast.game.core.testing.FakeAnalyticsTracker
 import com.puzzleblockblast.game.core.testing.FakeLevelProgressRepository
 import com.puzzleblockblast.game.core.testing.FakeLevelRepository
+import com.puzzleblockblast.game.core.testing.FakeEventRepository
 import com.puzzleblockblast.game.core.testing.FakeProgressionRepository
 import com.puzzleblockblast.game.core.testing.FakeAdsGateway
 import com.puzzleblockblast.game.core.testing.FakeEntitlements
@@ -61,6 +62,7 @@ class LevelGameViewModelTest {
     private fun viewModel(id: String = "L0001") = LevelGameViewModel(
         savedStateHandle = SavedStateHandle(mapOf(LevelGameViewModel.LEVEL_ID_KEY to id)),
         levels = levels,
+        events = FakeEventRepository(),
         progress = progress,
         progression = progression,
         analytics = analytics,

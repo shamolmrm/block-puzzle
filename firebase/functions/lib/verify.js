@@ -2,7 +2,7 @@
 // The app never grants a paid entitlement itself: only this logic, running on the server, does.
 import { createHash } from 'node:crypto';
 
-export const PACKAGE_NAME = 'com.puzzleblockblast.game';
+export const PACKAGE_NAME = 'com.bahalabs.blockfit';
 
 /** Product id -> entitlement field it grants. Must match the app's `Products`. */
 export const PRODUCTS = { remove_ads: 'removeAds' };

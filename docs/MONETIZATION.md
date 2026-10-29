@@ -16,7 +16,7 @@ Ad ids are injected at build time from **git-ignored** files (`core/monetization
 | File | Used by | Contents |
 |---|---|---|
 | *(none)* | **Debug** builds, always | Google's sample test ids. `AdMobGateway` refuses to start a debug build with real ids. |
-| `admob.properties` | **Release** builds | `appId=ca-app-pub-XXXX~YYYY`, `rewardedUnitId=ca-app-pub-XXXX/…`, `interstitialUnitId=ca-app-pub-XXXX/…` |
+| `admob.properties` | **Release** builds | `appId=ca-app-pub-XXXX~YYYY`, `rewardedUnitId=ca-app-pub-XXXX/…`, `interstitialUnitId=ca-app-pub-XXXX/…`, `bannerUnitId=ca-app-pub-XXXX/…` |
 | `ads-debug.properties` | Debug only | `testDeviceIds=<hashed id from logcat>`, `umpDebugGeography=EEA` (for testing the GDPR form) |
 
 - **Play bundle gate:** `gradlew :app:bundleRelease` **fails** when `admob.properties` is missing, so a bundle with test ads can't be uploaded by accident. Local release and benchmark APKs still build.
@@ -56,6 +56,8 @@ Interstitials appear only at **natural breaks**: leaving a finished Classic game
 | Players who bought "Remove ads" | never |
 | Without consent | never |
 
+**Banner** (`GameBanner`): one anchored adaptive banner on the Classic and level screens, at the very bottom below Undo / Hint. Pieces are dragged up from the tray toward the board, so a drag never ends on it, and the 16 dp game padding separates it from the buttons. It needs consent, is never shown after "Remove ads", isn't in the tutorial, and hides (and stops refreshing) while a level result card covers the screen.
+
 Rewarded ads are **always opt-in**. They appear only when a free resource has run out, and stay available after "Remove ads":
 
 | Where | Offer | Cap |
@@ -66,6 +68,8 @@ Rewarded ads are **always opt-in**. They appear only when a free resource has ru
 | Daily Challenge | none | It stays identical for everyone |
 
 ## "Remove ads" (one-time, Google Play Billing)
+
+> **Off in the first release.** `NoBillingGateway` is bound and the Play Billing dependency is removed, so the app sells nothing and Settings hides the store section. To turn it on: restore `PlayBillingGateway.kt` and the `play-billing` catalog entry from commit 178cd3d, bind it in `MonetizationModule`, then do the release steps below.
 
 1. **Offered only when it can be verified:** the store must return the product and a verification server must exist. Otherwise Settings shows "The store isn't available right now."
 2. **Buy:** the purchase carries `obfuscatedAccountId = SHA-256(Firebase uid)`.

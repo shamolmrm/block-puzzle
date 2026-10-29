@@ -17,6 +17,7 @@
     <string name="settings_backup_failed">Couldn\'t back up right now. Your progress is safe on this device; it will retry automatically.</string>
     <string name="settings_backup_now">Back up now</string>
     <string name="settings_ad_privacy">Ad privacy choices</string>
+    <string name="settings_privacy_policy">Privacy policy</string>
     <string name="settings_store">Remove ads</string>
     <string name="settings_remove_ads_detail">A one-time purchase that turns off the ads shown between games. Optional ads you choose to watch for an extra undo or hint stay available.</string>
     <string name="settings_remove_ads_buy">Remove ads · %1$s</string>

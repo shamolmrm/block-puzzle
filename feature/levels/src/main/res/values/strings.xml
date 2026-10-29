@@ -5,4 +5,12 @@
     <string name="levels_unavailable">Levels couldn\'t be loaded. Please reinstall or update the app.</string>
     <string name="levels_tile">Level %1$d, %2$d of 3 stars</string>
     <string name="levels_tile_locked">Level %1$d, locked. Finish the previous level to unlock it.</string>
+    <string name="event_label">This week\'s event</string>
+    <plurals name="event_days_left">
+        <item quantity="one">%1$d day left</item>
+        <item quantity="other">%1$d days left</item>
+    </plurals>
+    <string name="event_progress">%1$d / %2$d levels cleared</string>
+    <string name="event_finished">Event complete! A new one starts on Monday.</string>
+    <string name="event_unavailable">No event right now. Check back soon.</string>
 </resources>

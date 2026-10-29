@@ -1,6 +1,8 @@
 package com.puzzleblockblast.game.core.testing
 
 import android.app.Activity
+import android.content.Context
+import com.puzzleblockblast.game.core.monetization.ads.BannerAd
 import com.puzzleblockblast.game.core.monetization.ads.AdsGateway
 import com.puzzleblockblast.game.core.monetization.billing.BillingGateway
 import com.puzzleblockblast.game.core.monetization.billing.Entitlements
@@ -39,6 +41,14 @@ class FakeAdsGateway : AdsGateway {
     override suspend fun showInterstitial(activity: Activity): Boolean {
         interstitialShows++
         return true
+    }
+
+    var bannersCreated = 0
+
+    /** No real view in JVM tests: counts requests and returns nothing to show. */
+    override fun createBanner(context: Context, widthDp: Int): BannerAd? {
+        bannersCreated++
+        return null
     }
 }
 

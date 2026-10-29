@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -101,15 +102,26 @@ fun SettingsScreen(
                     Text(stringResource(R.string.settings_ad_privacy))
                 }
             }
+            // Play's User Data policy requires the privacy policy to be reachable from inside the app.
+            val uriHandler = LocalUriHandler.current
+            TextButton(onClick = { runCatching { uriHandler.openUri(PRIVACY_POLICY_URL) } }, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(stringResource(R.string.settings_privacy_policy))
+            }
 
-            SectionTitle(R.string.settings_store)
-            StoreRow(store, onBuyRemoveAds, onRestorePurchases)
+            // Hidden when nothing is sold (this release has no "Remove ads"): no dead "store unavailable" row.
+            if (store.offer != null || store.adsRemoved || store.purchase != PurchaseState.Idle) {
+                SectionTitle(R.string.settings_store)
+                StoreRow(store, onBuyRemoveAds, onRestorePurchases)
+            }
 
             SectionTitle(R.string.settings_backup)
             BackupRow(backup, onBackUpNow)
         }
     }
 }
+
+/** Hosted on the project's Firebase Hosting site (firebase/public). */
+internal const val PRIVACY_POLICY_URL = "https://blockfit-puzzle.web.app/privacy.html"
 
 @Composable
 private fun SectionTitle(@StringRes title: Int) {

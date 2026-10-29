@@ -18,7 +18,9 @@ import com.puzzleblockblast.game.feature.stats.navigation.StatsDestination
 import com.puzzleblockblast.game.feature.stats.navigation.statsScreen
 import com.puzzleblockblast.game.feature.game.navigation.LevelPlayRoute
 import com.puzzleblockblast.game.feature.game.navigation.levelPlayScreen
+import com.puzzleblockblast.game.feature.levels.navigation.EventDestination
 import com.puzzleblockblast.game.feature.levels.navigation.LevelSelectDestination
+import com.puzzleblockblast.game.feature.levels.navigation.eventScreen
 import com.puzzleblockblast.game.feature.levels.navigation.levelSelectScreen
 import com.puzzleblockblast.game.feature.game.navigation.TutorialDestination
 import com.puzzleblockblast.game.feature.game.navigation.classicGameScreen
@@ -51,6 +53,7 @@ fun PbbNavHost(tutorialCompleted: Boolean, modifier: Modifier = Modifier) {
             onPlayLevels = { navController.navigate(LevelSelectDestination) { launchSingleTop = true } },
             // The Daily Challenge is a generated level with id D<epoch day>, played on the level screen.
             onPlayDaily = { day -> navController.navigate(LevelPlayRoute(DailyChallenge.idFor(day))) { launchSingleTop = true } },
+            onPlayEvents = { navController.navigate(EventDestination) { launchSingleTop = true } },
             onOpenStats = { navController.navigate(StatsDestination) { launchSingleTop = true } },
             onOpenSettings = { navController.navigate(SettingsDestination) { launchSingleTop = true } },
             onHowToPlay = { navController.navigate(TutorialDestination(thenPlay = false)) { launchSingleTop = true } },
@@ -59,16 +62,20 @@ fun PbbNavHost(tutorialCompleted: Boolean, modifier: Modifier = Modifier) {
             onOpenLevel = { id -> navController.navigate(LevelPlayRoute(id)) { launchSingleTop = true } },
             onBack = navController::popBackStack,
         )
+        // Event levels are played on the level screen with run ids like E01L03@2915.
+        eventScreen(
+            onOpenLevel = { runId -> navController.navigate(LevelPlayRoute(runId)) { launchSingleTop = true } },
+            onBack = navController::popBackStack,
+        )
         statsScreen(onBack = navController::popBackStack)
         levelPlayScreen(
-            // From a daily there is no level list on the stack: popBackStack falls back to Home.
-            onLevels = {
-                if (!navController.popBackStack(LevelSelectDestination, inclusive = false)) navController.popBackStack()
-            },
-            // "Next level" replaces the finished level, so Back still returns to the level list.
+            // Back to whatever list opened the level (Levels or Events); from a daily, Home.
+            onLevels = navController::popBackStack,
+            // "Next level" replaces the finished level, so Back still returns to the list it came from.
             onNextLevel = { id ->
+                val current = navController.currentBackStackEntry?.destination?.id
                 navController.navigate(LevelPlayRoute(id)) {
-                    popUpTo<LevelSelectDestination> { inclusive = false }
+                    if (current != null) popUpTo(current) { inclusive = true }
                 }
             },
         )

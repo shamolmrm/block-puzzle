@@ -52,7 +52,7 @@ object LevelPackParser {
         }
     }
 
-    private fun toDefinition(dto: LevelDto, problems: MutableList<String>): LevelDefinition? {
+    internal fun toDefinition(dto: LevelDto, problems: MutableList<String>): LevelDefinition? {
         val board = parseBoard(dto.boardSize, dto.initialBoard, problems) ?: return null
         val gems = board.toTileArray().count { it == Board.GEM }
         val objectives = dto.objectives.mapNotNull { o ->

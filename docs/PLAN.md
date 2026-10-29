@@ -1,7 +1,7 @@
-# Puzzle Block Blast — Architecture & Implementation Plan
+# BlockFit Puzzle — Architecture & Implementation Plan
 
 Status: **Approved 2026-10-18.** Phase 1 is implemented.
-Decisions: applicationId `com.puzzleblockblast.game`, git initialised, Hilt with KSP, and the v1 undo, hint and scoring defaults (see `SCORING.md`).
+Decisions: applicationId `com.bahalabs.blockfit` (code namespace stays `com.puzzleblockblast.game`), git initialised, Hilt with KSP, and the v1 undo, hint and scoring defaults (see `SCORING.md`).
 Change during Phase 1: compileSdk raised to **37**, because the current AndroidX libraries require it. targetSdk stays at 36.
 
 ---

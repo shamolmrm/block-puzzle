@@ -3,6 +3,9 @@ package com.puzzleblockblast.game.feature.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.puzzleblockblast.game.core.data.config.ConfigRepository
+import com.puzzleblockblast.game.core.data.level.EventRepository
+import com.puzzleblockblast.game.core.engine.level.EventSchedule
+import kotlinx.coroutines.flow.flow
 import com.puzzleblockblast.game.core.data.progress.ProgressionRepository
 import com.puzzleblockblast.game.core.data.time.WallClock
 import com.puzzleblockblast.game.core.model.progress.PlayerLevel
@@ -19,22 +22,27 @@ data class HomeProfile(
     val streak: Int,
     /** Remote kill switch for the Daily Challenge. */
     val dailyEnabled: Boolean = true,
+    /** Days left in this week's event; null when there is none. */
+    val eventDaysLeft: Int? = null,
 )
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     progression: ProgressionRepository,
     config: ConfigRepository,
+    events: EventRepository,
     private val clock: WallClock,
 ) : ViewModel() {
 
     val profile: StateFlow<HomeProfile?> = clock.todayEpochDay().let { today ->
-        combine(progression.snapshot(today), progression.dailyResults, config.config) { snapshot, daily, appConfig ->
+        val event = flow { emit(EventSchedule.active(events.events(), today)) }
+        combine(progression.snapshot(today), progression.dailyResults, config.config, event) { snapshot, daily, appConfig, active ->
             HomeProfile(
                 level = snapshot.playerLevel,
                 dailyDoneToday = daily[today]?.isCompleted == true,
                 streak = snapshot.currentStreak,
                 dailyEnabled = appConfig.dailyChallengeEnabled,
+                eventDaysLeft = active?.daysLeft(today),
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)

@@ -15,7 +15,6 @@ These answers are based on the code as of Phase 8, assuming Firebase and AdMob a
 | App info and performance → Crash logs, Diagnostics | Yes | No | App functionality, analytics | Yes (Settings toggle) | Crashlytics |
 | Device or other IDs (advertising ID, app set ID) | Yes | Yes (ad network) | Advertising, fraud prevention | Consent where required | AdMob |
 | Device or other IDs (Firebase installation / anonymous user id) | Yes | No | App functionality, analytics | No | Firebase |
-| Financial info → Purchase history | Yes | No | App functionality (verify Remove ads) | Yes (only if purchasing) | Google Play / our server |
 | Approximate location (IP-derived, by the ad SDK) | Check AdMob's current disclosure | — | Advertising | — | AdMob |
 
-**Not collected:** name, email, contacts, photos, precise location, messages, health and fitness data.
+**Not collected:** name, email, contacts, financial or purchase info, photos, precise location, messages, health and fitness data.

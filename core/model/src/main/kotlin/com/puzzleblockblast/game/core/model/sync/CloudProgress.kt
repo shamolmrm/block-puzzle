@@ -74,6 +74,9 @@ object ProgressMerge {
             .associate { (device, values) -> device to values.filter { (k, v) -> k in CloudProgress.ADDITIVE && v >= 0 } },
     )
 
+    /** Only pack levels sync; weekly event runs (`E01L03@2915`) stay on the device. */
+    fun isSyncedLevelId(id: String): Boolean = LEVEL_ID.matches(id)
+
     const val MAX_LEVELS = 1_000
     const val MAX_DAYS = 5_000
     const val MAX_ACHIEVEMENTS = 200

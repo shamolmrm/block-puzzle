@@ -1,0 +1,5 @@
+# Real AdMob ids for RELEASE builds (git-ignored). Debug builds always use Google's test ids.
+appId=ca-app-pub-2787796580971664~7647519674
+rewardedUnitId=ca-app-pub-2787796580971664/8825044984
+interstitialUnitId=ca-app-pub-2787796580971664/2875459168
+bannerUnitId=ca-app-pub-2787796580971664/2367272830

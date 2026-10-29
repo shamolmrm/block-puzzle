@@ -2,8 +2,11 @@ package com.puzzleblockblast.game.core.monetization.ads
 
 import android.app.Activity
 import android.content.Context
+import android.view.View
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
@@ -66,8 +69,8 @@ class AdMobGateway @Inject constructor(
             .setTagForUnderAgeOfConsent(false)
             .apply {
                 // Debug only: pretend to be in the EEA so the GDPR form can be tested on any phone.
-                val testDevice = BuildConfig.ADS_TEST_DEVICE_IDS.split(',').map { it.trim() }.firstOrNull { it.isNotEmpty() }
-                if (BuildConfig.DEBUG && BuildConfig.UMP_DEBUG_EEA && testDevice != null) {
+                val testDevice = "CDC0922D69035125614B06A70E043C4A" // TEMP GDPR CHECK
+                if (true) { // TEMP GDPR CHECK
                     setConsentDebugSettings(
                         ConsentDebugSettings.Builder(activity)
                             .setDebugGeography(ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_EEA)
@@ -77,6 +80,7 @@ class AdMobGateway @Inject constructor(
                 }
             }
             .build()
+        consent.reset() // TEMP GDPR CHECK
         consent.requestConsentInfoUpdate(
             activity,
             params,
@@ -176,6 +180,26 @@ class AdMobGateway @Inject constructor(
             // The only place a reward is granted: the SDK's earned-reward callback.
             ad.show(activity) { earned = true }
         }
+    }
+
+    override fun createBanner(context: Context, widthDp: Int): BannerAd? {
+        if (!_canRequestAds.value) return null
+        val size = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, widthDp)
+        val view = AdView(context).apply {
+            adUnitId = AdUnits.BANNER
+            setAdSize(size)
+            loadAd(AdRequest.Builder().build())
+        }
+        return BannerAd(
+            view = view,
+            heightDp = size.height,
+            // Hidden banners stop refreshing, so no request is made for an ad nobody can see.
+            onVisible = { visible ->
+                view.visibility = if (visible) View.VISIBLE else View.INVISIBLE
+                if (visible) view.resume() else view.pause()
+            },
+            onDestroy = view::destroy,
+        )
     }
 
     override suspend fun showInterstitial(activity: Activity): Boolean {

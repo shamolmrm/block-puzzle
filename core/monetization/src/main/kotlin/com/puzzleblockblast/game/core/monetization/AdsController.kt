@@ -1,6 +1,7 @@
 package com.puzzleblockblast.game.core.monetization
 
 import android.app.Activity
+import android.content.Context
 import com.puzzleblockblast.game.core.analytics.AnalyticsEvent
 import com.puzzleblockblast.game.core.analytics.AnalyticsEvents
 import com.puzzleblockblast.game.core.analytics.AnalyticsTracker
@@ -9,6 +10,7 @@ import com.puzzleblockblast.game.core.data.time.WallClock
 import com.puzzleblockblast.game.core.model.ads.AdPolicy
 import com.puzzleblockblast.game.core.model.ads.InterstitialPacer
 import com.puzzleblockblast.game.core.monetization.ads.AdsGateway
+import com.puzzleblockblast.game.core.monetization.ads.BannerAd
 import com.puzzleblockblast.game.core.monetization.billing.Entitlements
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,7 +20,7 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** What gameplay screens use: rewarded ads on request, interstitials paced at breaks. */
+/** What gameplay screens use: rewarded ads on request, interstitials paced at breaks, a banner above the game. */
 @Singleton
 class AdsController @Inject constructor(
     private val gateway: AdsGateway,
@@ -33,6 +35,13 @@ class AdsController @Inject constructor(
     /** A rewarded ad can be offered right now. Rewarded ads stay available (opt-in) even with ads removed. */
     val rewardedAvailable: StateFlow<Boolean> = combine(gateway.canRequestAds, gateway.rewardedReady) { can, ready -> can && ready }
         .stateIn(scope, SharingStarted.Eagerly, false)
+
+    /** Gameplay banners: only with consent, never once ads are removed. */
+    val bannersAllowed: StateFlow<Boolean> = combine(gateway.canRequestAds, entitlements.adsRemoved) { can, removed -> can && !removed }
+        .stateIn(scope, SharingStarted.Eagerly, false)
+
+    fun createBanner(context: Context, widthDp: Int): BannerAd? =
+        if (bannersAllowed.value) gateway.createBanner(context, widthDp) else null
 
     /** Shows a rewarded ad; true only if the SDK confirmed the reward was earned. */
     suspend fun watchRewarded(activity: Activity, source: String): Boolean {

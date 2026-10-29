@@ -1,8 +1,10 @@
 package com.puzzleblockblast.game.core.testing
 
+import com.puzzleblockblast.game.core.data.level.EventRepository
 import com.puzzleblockblast.game.core.data.level.LevelProgress
 import com.puzzleblockblast.game.core.data.level.LevelProgressRepository
 import com.puzzleblockblast.game.core.data.level.LevelRepository
+import com.puzzleblockblast.game.core.engine.level.EventDefinition
 import com.puzzleblockblast.game.core.engine.level.LevelDefinition
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,4 +28,8 @@ class FakeLevelProgressRepository(initial: Map<String, LevelProgress> = emptyMap
     private fun edit(levelId: String, transform: (LevelProgress) -> LevelProgress) = state.update {
         it + (levelId to transform(it[levelId] ?: LevelProgress(levelId)))
     }
+}
+
+class FakeEventRepository(private val all: List<EventDefinition> = emptyList()) : EventRepository {
+    override suspend fun events(): List<EventDefinition> = all
 }

@@ -6,7 +6,7 @@ Status: **Phase 8: the build is release-ready in test mode.** Nothing has been u
 
 | Type | Purpose | Signing | Notes |
 |---|---|---|---|
-| `debug` | Development | Debug key | id `com.puzzleblockblast.game.debug`, installs alongside release |
+| `debug` | Development | Debug key | same id as release (one Firebase app); installing one replaces the other |
 | `release` | Play upload | **Your upload key** via `keystore.properties` (never committed) | R8 shrinking + resource shrinking; unsigned when `keystore.properties` is absent |
 | `benchmarkRelease` | Local testing of the optimized build, Baseline Profile and startup benchmark | Debug key | Created by the Baseline Profile plugin; never upload it |
 
@@ -56,7 +56,7 @@ The fix (drag preview through `derivedStateOf`, pointer and animation progress r
 
 ## Versioning
 
-`versionCode` must increase with every upload, and `versionName` is what players see. Both are in `app/build.gradle.kts`. The current values are 1 and 1.0.0.
+`versionCode` must increase with every upload, and `versionName` is what players see. Both are in `app/build.gradle.kts`. The current values are 4 and 1.0.0.
 
 ## Pre-release checklist
 
@@ -79,16 +79,16 @@ Each step below needs your explicit approval. ✅ marks work that's already done
 - ⬜ Manual playtest on 2 or 3 more devices, including Android 7 and a tablet
 
 **Accounts and services (you)**
-- ⬜ Google Play developer account; create the app with id `com.puzzleblockblast.game`
+- ⬜ Google Play developer account; create the app with id `com.bahalabs.blockfit`
 - ⬜ Upload key and `keystore.properties`; enrol in Play App Signing
 - ⬜ Firebase project and `app/google-services.json` (docs/FIREBASE.md); deploy the Firestore rules
 - ⬜ AdMob account, app and real ad units. Swap them in only for the release, and keep test devices registered (docs/MONETIZATION.md)
-- ⬜ `remove_ads` in-app product; service account; Blaze plan; deploy the functions (`verifyPurchase`, `revokeVoidedPurchases`)
+- ➖ "Remove ads" is off in this release (NoBillingGateway, no Play Billing). To add it later see docs/MONETIZATION.md
 
 **Store**
-- ⬜ Privacy policy hosted at a public URL (draft: `docs/store/privacy-policy.md`, needs your contact details and a legal review)
+- ⬜ Privacy policy and data deletion pages: `firebase/public/` (privacy.html, delete.html), deployed with `firebase deploy --only hosting` to https://blockfit-puzzle.web.app/privacy.html (linked from Settings)
 - ⬜ Data safety form (answers: `docs/store/data-safety.md`)
-- ⬜ Content rating questionnaire (IARC): no violence; ads present; purchases present
+- ⬜ Content rating questionnaire (IARC): no violence; ads present; no purchases
 - ⬜ Target audience: not designed for children under 13. If you change that, Families policies and ad settings change too.
 - ⬜ Listing text and screenshots (draft: `docs/store/listing.md`)
 - ⬜ Internal testing track → closed testing → production. New personal developer accounts need a closed test with testers before production; check the current Play requirement.

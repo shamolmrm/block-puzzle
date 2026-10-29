@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// Puzzle Block Blast. The only data is each player's own progress backup (docs/FIREBASE.md).
+// BlockFit Puzzle. The only data is each player's own progress backup (docs/FIREBASE.md).
 // Progress is cosmetic and private: there are no leaderboards, so no client-submitted score is
 // ever trusted for anything competitive. The app also sanitizes everything it reads back.
 service cloud.firestore {

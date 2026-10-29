@@ -48,6 +48,7 @@ import com.puzzleblockblast.game.core.engine.board.GridPoint
 import com.puzzleblockblast.game.core.engine.level.LevelResult
 import com.puzzleblockblast.game.core.engine.level.Objective
 import com.puzzleblockblast.game.core.engine.level.ObjectiveProgress
+import com.puzzleblockblast.game.feature.game.GameBanner
 import com.puzzleblockblast.game.feature.game.GameScreen
 import com.puzzleblockblast.game.feature.game.OverlayScrim
 import com.puzzleblockblast.game.feature.game.PauseButton
@@ -76,6 +77,10 @@ fun LevelGameRoute(
         onWatchAdForHint = { activity?.let(viewModel::onWatchAdForHint) },
         // Leaving a finished level is a natural break: an interstitial may show (paced, consented).
         throughBreak = { action -> if (activity != null) viewModel.onBreak(activity, action) else action() },
+        banner = { visible ->
+            val allowed by viewModel.bannersAllowed.collectAsStateWithLifecycle()
+            if (allowed) GameBanner(visible = visible, create = viewModel::createBanner)
+        },
     )
 }
 
@@ -95,6 +100,8 @@ fun LevelGameScreen(
     onWatchAdForHint: () -> Unit = {},
     /** Runs a result-card action, possibly after an interstitial. */
     throughBreak: (() -> Unit) -> Unit = { it() },
+    /** Ad banner above the game; told to hide while a result card covers the screen. */
+    banner: (@Composable (visible: Boolean) -> Unit)? = null,
 ) {
     if (state.notFound) {
         LevelUnavailable(onLevels, modifier)
@@ -114,6 +121,11 @@ fun LevelGameScreen(
             showGameOver = false,
             header = { LevelHeader(state, onPause) },
             onWatchAdForHint = onWatchAdForHint,
+            banner = if (banner != null) {
+                { banner(state.result == LevelResult.IN_PROGRESS) }
+            } else {
+                null
+            },
         )
         when (state.result) {
             LevelResult.WON -> LevelCompleteOverlay(

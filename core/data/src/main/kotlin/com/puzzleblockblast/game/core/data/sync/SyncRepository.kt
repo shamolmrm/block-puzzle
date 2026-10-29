@@ -114,7 +114,8 @@ class SyncRepository @Inject constructor(
         val counters = progressionDao.counters().associate { it.name to it.value }
         val deviceId = deviceId()
         CloudProgress(
-            levels = levelDao.all().filter { it.stars > 0 }.associate { it.levelId to ResultRecord(it.stars, it.bestScore) },
+            // Event runs grow every week: uploading them would eventually breach the rules' size cap.
+            levels = levelDao.all().filter { it.stars > 0 && ProgressMerge.isSyncedLevelId(it.levelId) }.associate { it.levelId to ResultRecord(it.stars, it.bestScore) },
             daily = progressionDao.dailyResults().filter { it.stars > 0 }.associate { it.epochDay to ResultRecord(it.stars, it.bestScore) },
             achievements = progressionDao.unlocks().associate { it.id to it.unlockedAtMillis },
             bests = counters.filterKeys { it in CloudProgress.MAXIMA },
