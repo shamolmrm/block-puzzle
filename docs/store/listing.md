@@ -2,7 +2,7 @@
 
 **App name:** BlockFit Puzzle · **Developer:** BahaLabs · **Email:** hamidakhan7654@gmail.com
 
-**Website:** https://blockfit-puzzle.web.app · **Privacy policy:** https://blockfit-puzzle.web.app/privacy.html · **Data deletion:** https://blockfit-puzzle.web.app/delete.html
+**Website:** https://blockfit-puzzle.web.app · **Privacy policy:** https://blockfit-puzzle.web.app/privacy.html · **Terms of service:** https://blockfit-puzzle.web.app/terms.html · **Data deletion:** https://blockfit-puzzle.web.app/delete.html
 
 **Short description (≤ 80 chars):**
 Drag blocks, clear lines and beat 50 hand-made levels. Play offline, anytime.
